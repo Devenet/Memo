@@ -1,0 +1,8 @@
+IP=`echo $SSH_CONNECTION | awk '{print $1}'`
+REVERSE=`dig -x $IP +short`
+
+if [ -z ${REVERSE} ]
+  then REVERSE="unknow"
+fi
+
+echo "$USER connected on `hostname -f` from $IP ($REVERSE)" | mail -s "SSH connection" dude@domain.tld

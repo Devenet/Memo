@@ -1,0 +1,9 @@
+Port XYZ
+
+# Authentication:
+LoginGraceTime 120
+PermitRootLogin no
+StrictModes yes
+AllowUsers username
+
+X11Forwarding no
