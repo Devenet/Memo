@@ -1,6 +1,6 @@
 # Installation et configuration d'un serveur sur Debian
 
-Ce guide a été effectué et mis à jour dans pour une installation sur une Dedibox. Cependant, à part la première partie à adapter, le reste est valable quelque soit le serveur ;-)
+Ce guide a été effectué et mis à jour pour une installation sur une Dedibox. Cependant, à part la première partie à adapter, le reste est valable quelque soit le serveur ;-)
 
 ***
 
@@ -619,6 +619,9 @@ Après avoir configurer les utilisateurs et la configuration via l'application w
 	'maintenance' => false
 
 _Si vous souhaitez modifier le thème, je vous redirige vers [cet article](http://blog.nicolabricot.com/post/2014/modifier-et-configurer-son-theme-owncloud-ou-comment-changer-le-titre-le-pied-de-page-et-le-slogan)._
+
+
+## MySQL
 
 
 
