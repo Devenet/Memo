@@ -63,8 +63,8 @@ Au niveau de l'arborescence, j'ai fait le choix suivant :
 
 	/data
 		/apache
+			/auth
 			/conf
-			/alias
 			/error
 		/cloud
 		/git
@@ -112,7 +112,7 @@ _Pour que l'envoie d'email fonctionne, on configurera `ssmtp` dans la suite._
 
 ### ssmtp
 
-Pour l'envoyer d'emails, on installe : 
+Pour envoyer des emails, on installe : 
 
 	apt-get install mailutils ssmtp
 
@@ -346,7 +346,7 @@ Une fois que les deux précédents vhosts sont configurés, on peut maintenant c
 		</Directory>
 		<Directory /data/www/domain.tld/beta>
 			Options +Indexes
-			Include /data/apache/auth/auth_server.conf
+			Include /data/apache/conf/auth_server.conf
 			Require group developers
 		</Directory>
 
@@ -466,4 +466,159 @@ On installe juste de quoi cloner et mettre à jour un dépôt :
 Sauf exception, les dépôts git seront clonés dans `/data/git`, et on fera des liens symboliques vers les dépôts si besoin (permet, sauf exception, de rationnaliser).
 
 	ln -s /data/git/moodpicker /data/www/vhost/moods
+	
+Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne soit pas accessible en ajoutant dans `/etc/apache2/conf.d/security` les directives suivantes :
+
+	<DirectoryMatch "/\.git">
+		Deny from all
+		Satisfy all
+	</DirectoryMatch>	
+
+
+## Munin
+
+Munin "server" récupère les infos sur les Munin "nodes". Notre Dedibox sera donc forcément un nœud, mais sera aussi le serveur pour les autres nœuds de notre réseau.
+
+On va donc installer simplement :
+
+	apt-get install munin
+
+Si seul le nœud nous intéresse, il suffit de faire un `apt-get install munin-node`.
+
+### Munin node
+
+#### Paramètres
+
+Il faut regarder du côté de `/etc/munin/munin-node.conf`. On vérifie qu'on s'autorise à écouter le nœud pour récupérer les informations :
+
+	allow ^127\.0\.0\.1$
+	allow ^::1$
+
+Pour le cas d'un nœud de notre réseau, il faudra insérer l'IP du serveur :
+
+	allow ^172\.16\.0\.42$
+	
+_Si, malheureusement, le serveur (qui héberge Munin serveur) a une adresse IP dynamique, il faudra ruser en autorisant n'importe quelle IP avec :_
+
+	allow ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+
+_Néanmoins, celle solution n'est pas tip-top, et est donc à éviter !_
+
+#### Plugins
+
+La documentation disponible sur le site francophone d'Ubuntu est assez complète : [doc.ubuntu-fr.org/munin](http://doc.ubuntu-fr.org/munin#munin-node_le_demon_sur_les_noeuds).
+
+	munin-node-configure --suggest --shell
+	…
+	service munin-node restart
+
+### Munin server
+
+#### Configuration
+
+La configuration se fait dans `/etc/munin/munin.conf` :
+
+	htmldir /data/www/munin
+	contact.you.command mail -s "[Munin] Alert on ${var:host}" you@domain.tld
+	
+	[server.domain.tld]
+    	address 127.0.0.1
+    	use_node_name yes
+    	contacts you
+	[server2.domain.tld]
+    	address server2.domain.tld
+    	use_node_name yes
+    	contacts you
+	[server3.domain.tld]
+    	address server3.domain.tld
+    	use_node_name yes
+    	contacts you
+	
+On supprime le lien symbolique que Munin a ajouté dans `/etc/apache2/conf.d` qui a pour conséquence que chaque vhost suivi de `/munin` affiche Munin :/
+
+	rm /etc/apache2/conf.d/munin
+
+Et on crée un vhost spécifique pour Munin !
+
+#### Templates
+
+Le template par défaut étant assez… moche, on va le changer. On va utiliser [MunStrap](https://github.com/nicolabricot/MunStrap).
+
+On commence par récupérer le dépôt Git :
+
+	git clone https://github.com/nicolabricot/MunStrap /data/git/munstrap
+
+On archive les templates actuels et on fait un lien symbolique vers les nouveaux :
+	
+	mv /etc/munin/static /etc/munin/static.bak
+	mv /etc/munin/templates /etc/munin/templates.bak
+	
+	ln -s /data/git/munstrap/static /etc/munin/static
+	ln -s /data/git/munstrap/templates /etc/munin/templates
+
+Vous verrez le changement lors de la prochaine itération de Munin.
+
+#### Tâche CRON
+
+Par défaut Munin server s'exécute toutes les 5 minutes, pour récupérer les données, et générer le HTML et les graphes. Cela peut utiliser beaucoup de ressources (sur un Rapsberry Pi par exemple) ; on peut donc générer le HTML et les graphes moins régulièrement.
+
+Il suffit de modifier le fichier `/usr/bin/munin-cron` en :
+
+	MINUTE=`date +"%M"`
+	if [ `expr $MINUTE % 30` -eq 0  ] ; then
+
+	# We always launch munin-html.
+	# It is a noop if html_strategy is "cgi"
+	nice /usr/share/munin/munin-html $@ || exit 1
+
+	# The result of munin-html is needed for munin-graph.
+	# It is a noop if graph_strategy is "cgi"
+	nice /usr/share/munin/munin-graph --cron $@ || exit 1
+
+	fi
+
+Ici, on ne génère le HTML et les graphes que toutes les `30` minutes.
+
+
+## ownCloud
+
+Je ne préfère pas installer ownCloud depuis le paquet Debian ; on va donc télécharger l'archive depuis le site.
+
+On va installer les fichiers web dans  `/data/www/owncloud` et les données propres dans `/data/cloud`.
+
+	cd /data/www
+	wget https://download.owncloud.org/community/owncloud-X.tar.bz2
+	tar -vxjf owncloud-X.tar.bz2
+
+On installe aussi le support de PHP GD :
+
+	apt-get install php5-gd
+	
+On créé ensuite un vhost dans Apache et on peut ensuite accéder à l'URL souhaitée pour la configuration.  
+
+Si vous ne disposez que de peu d'utilisateurs qui s'y connecteront (ou pour de petites machines), il suffit de choisir SQLite comme base de données. Sinon on prendra MySQL.
+
+Pour activer les tâches CRON nécessaires, on lancer l'éditeur CRON pour l'utilisateur `www-data` d'Apache :
+	
+	crontab -u www-data -e
+	
+Et on peut ajouter la ligne suivante :
+
+	*/15  *  *  *  * php -f /data/www/owncloud/cron.php
+
+Après avoir configurer les utilisateurs et la configuration via l'application web, on va aller modifier le fichier `/data/www/owncloud/config/config.php` :
+
+	'asset-pipeline.enabled' => true,
+	'knowledgebaseenabled' => false,
+	'default_language' => 'fr',
+	'enable_previews' => false,
+	'loglevel' => '4',
+	'mail_domain' => 'domain.tld',
+	'mail_from_address' => 'cloud',
+	'mail_smtpmode' => 'php',
+	'maintenance' => false
+
+_Si vous souhaitez modifier le thème, je vous redirige vers [cet article](http://blog.nicolabricot.com/post/2014/modifier-et-configurer-son-theme-owncloud-ou-comment-changer-le-titre-le-pied-de-page-et-le-slogan)._
+
+
 
