@@ -52,6 +52,8 @@ Pour que les paramètres soient pris en compte :
 
 On peut se déconnecter pour se reconnecter avec les nouveaux paramètres, et on est prêt pour la suite.
 
+***
+
 # Configuration et installation de paquets
 
 Avant l'installation d'un paquet, on vérifie toujours que son système est à jour :
@@ -65,7 +67,6 @@ Au niveau de l'arborescence, j'ai fait le choix suivant :
 		/apache
 			/auth
 			/conf
-			/error
 		/cloud
 		/git
 			/some-repository
@@ -621,7 +622,161 @@ Après avoir configurer les utilisateurs et la configuration via l'application w
 _Si vous souhaitez modifier le thème, je vous redirige vers [cet article](http://blog.nicolabricot.com/post/2014/modifier-et-configurer-son-theme-owncloud-ou-comment-changer-le-titre-le-pied-de-page-et-le-slogan)._
 
 
-## MySQL
+***
 
+# Mise en place de sauvegardes
+
+## Sauvegardes incrémentales locales
+
+On va sauvegarder localement à intervalles réguliers l'état de nos données à différents moments.
+
+	apt-get install rsnapshot
+	cp /etc/rsnapshot.conf /etc/rsnapshot.conf.default
+
+### Configuration
+
+On peut maintenant modifier le fichier `/etc/rsnapshot.conf` avec notre configuration :
+
+	snapshot_root	/data/backup/
+
+	retain		hourly		6
+	retain		daily		7
+	retain		weekly		4
+
+	# Server
+	backup		/data/apache/			server/
+	backup		/data/cloud/			server/
+	backup		/data/git/				server/
+	backup		/data/www/				server/
+	
+	backup		/etc/apache2/			server/
+	backup		/etc/apticron/			server/
+	backup		/etc/fail2ban/			server/
+	backup		/etc/hostname			server/
+	backup		/etc/hosts				server/
+	backup		/etc/logwatch/			server/
+	backup		/etc/motd				server/
+	backup		/etc/munin/				server/
+	backup		/etc/rsnapshot.conf		server/
+	backup		/etc/ssh/				server/
+	backup		/etc/ssl/public/		server/
+	backup		/etc/ssl/private/		server/
+	backup		/etc/ssmtp/				server/
+
+	backup		/var/spool/cron/crontabs/		server/
+
+* Les intervalles sont à choisir en fonction de ce que vous souhaitez et quelle sécurité de sauvegarde vous souhaitez.
+* Les répertoires à sauvegarder aussi ; dans mon cas je sauvegarde les données présentes sur `/data` et les fichiers de configuration intéressants de `/etc`.
+* Il est possible de faire exécuter un script avant et après l'exécution de rsnapshot avec `cmd_preexec` ou `cmd_postexec`.
+* Vérifier bien que ce sont de vraies tabulations qui séparent les données.
+
+On peut ensuite tester notre fichier de configuration et simuler une première itération pour voir les actions qui seraient effectuées :
+
+	rsnapshot configtest
+	
+	rsnapshot -t hourly > /tmp/rsnap_test
+	cat /tmp/rsnap_test | less
+
+### Automatisation 
+
+Il suffit d'ajouter dans le fichier crontab les lignes suivantes (en fonction des intervalles de sauvegarde que vous avez choisi !)
+
+	crontab -u root -e
+
+	0 */4 * * *       /usr/bin/rsnapshot hourly
+	30 23 * * *       /usr/bin/rsnapshot daily
+	00 23 * * 7       /usr/bin/rsnapshot weekly
+
+
+Pour effectuer une sauvergarde locale non programmée, la commande suivante suffit :
+
+	 rsnapshot hourly
+
+Alors, on a une sauvegarde locale de l'état de nos données à différents moments. Ainsi, on peut récupérer un document dans son état la veille, etc.  
+Seulement ces backups sont stockés localement, on va donc devoir en faire une sauvegarde autre part.
+
+## Sauvegardes externes
+
+Pour sécuriser nos sauvergardes locales incrémentales, on va utiliser l'espace de stockage FTP fourni.  
+Le paquet `rsync` ne permet pas directement de sauvegarder sur un FTP, on va donc utiliser `backup-manager` :
+
+	apt-get install backup-manager
+	cp backup-manager.conf backup-manager.conf.default
+
+### Configuration
+
+On peut maintenant modifier la configuration du fichier `/etc/backup-manager.conf` pour coller avec nos souhaits :
+
+	export BM_ARCHIVE_TTL="0"
+	export BM_TARBALL_DIRECTORIES="/data/backup"
+	
+	export BM_UPLOAD_METHOD="ftp"
+	export BM_UPLOAD_DESTINATION="/backup"
+	export BM_UPLOAD_FTP_USER="ftp-user"
+	export BM_UPLOAD_FTP_PASSWORD="ftp-password"
+	export BM_UPLOAD_FTP_HOSTS="ftp-host.domain.tld"
+	
+	export BM_BURNING_METHOD="none"
+
+	
+_Se reporter à la [documentation Dedibox](http://documentation.online.net/fr/serveur-dedie/sauvegarde/sauvegarde-dedibackup) pour les identifiants Dedibox à utiliser._ 
+
+On peut ensuite lancer manuellement la copie pour s'assurer que tout se passe bien :
+
+	backup-manager
+
+Pour vérifier que notre archive a bien été déposée, on se connecter au FTP
+
+	ftp -n ftp-host.domain.tld
+	ftp> user ftp-user ftp-password
+	ftp> passive
+	ftp> ls
+	ftp> exit
+
+On peut maintenant automatiser ce backup.
+
+### Automatisation
+
+Comme pour les sauvegardes locales, on utiliser les tâches CRON :
+
+	crontab -u root -e
+	
+	0 1 * * *       /usr/sbin/backup-manager -v | mail -s "[Backup] Synchronization performed" you@domain.tld
+
+Ici, les sauvergades seront envoyées sur le serveur FTP tous les jours à 1 heure du matin.
+
+## Vérification/récupération d'une sauvegarde
+
+C'est bien on a mis en place une sauvegarde locale incrémentale et une sauvergade externe des ces sauvegardes incrémentales.  
+Mettons nous dans le cas où nous aurions besoin de récupérer une sauvegarde !
+
+### Sauvegerde locale
+
+S'il s'agit d'un ou plusieurs fichiers modifiés il y a peu de temps, on peut aller les récupérer grâce à notre sauvegarde locale dans `/data/backup`.
+
+Il suffit juste de savoir quelle version nous intéresse (il y a 2 heures, il y 2 jours, il y a 1 semaine ?).
+
+### Sauvegarde externe
+
+Si notre disque a crashé, ou si le dossier des sauvegardes locales est inutilisable, on peut respirer et se tourner vers le backup sur le serveur FTP.
+
+On s'y connecte et on liste les fichiers disponibles :
+
+	ftp -n ftp-host.domain.tld
+	ftp> user ftp-user ftp-password
+	ftp> passive
+	ftp> ls backup
+
+Ensuite, il faut rapatrier l'archive qui nous intéresse localement avec 
+
+	ftp> cd backup
+	ftp> get nom_du_backup.date.tar.gz
+	ftp> exit
+
+On a maintenant le fichier en local, qu'on extrait et que l'on peut parcourir pour récupérer le ou les fichiers souhaités :-)
+
+	tar -xvzf nom_du_backup.date.tar.gz
+
+Même si cette manipulation ne serait à faie qu'en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu'elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n'avez pas oublié des fichiers à sauvegarde ;-)
 
 
