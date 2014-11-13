@@ -186,7 +186,7 @@ On peut ensuite configurer ssmtp via le fichier `/etc/ssmtp/ssmtp.conf`. Ici on 
 
 Pour vérifier que la configuration est bonne, il suffit de s'envoyer un email :
 
-	echo "Test OK" | mail -s "Hello world!" you@domain.tld
+	echo "Test OK" | mail -s "Hello world" you@domain.tld
 
 Penser à modifier le fichier `/etc/passwd` pour mettre à jour le nom des utilisateurs avec quelque chose de plus friendly :
 
