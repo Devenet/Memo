@@ -6,7 +6,7 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 * [Serveur](#serveur)
 * [Première connexion](#première-connexion)
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
-  * [Hostname](#hostname)
+  * [Hostname](#hostname) 
   * [SSH](#ssh)
   * [Utilitaires](#utilitaires) : _[ssmtp](#ssmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron)_
   * [Apache2 et PHP 5](#apache-2-et-php-5) : _[Installation et configuration](#installation-et-configuration), [Virtual hosts](#virtual-hosts), [Activation du SSL (HTTPS)](activation-du-ssl-https), [Application des paramètres](#application-des-paramètres)_
@@ -106,6 +106,44 @@ On va modifier le fichier `/etc/hosts` pour y ajouter notre nom de domaine compl
 On peut vérifier que c'est correct avec `hostname` puis `hostname -f`.
 
 _Si l'on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il faudrait modifier le fichier `/etc/network/interfaces`._
+
+### IP externe dynamique
+
+Si votre serveur est hebergé par un professionnel ou que vous avez une IP fixe, il suffit de modifier vos entrées DNS pour que `name.domain.tld` pointe vers l'IP externe de votre serveur.  
+
+Dans le cas où l'on ne possède qu'une adresse IP dynamique, il va falloir ruser en mettant à jour notre enregistrement DNS à chaque fois que l'IP change.  
+On a différentes manières de le faire, dont utiliser un service externe : DynDNS (payant maintenant !), No-Ip (limité à 3 hosts pour le compte gratuit), DynHost d'OVH, ...  
+On va prendre l'exemple du service DynHost ; pour les autres services, il suffit d'adapter.
+
+On installe `ddclient` qui va permettre de mettre à jour automatiquement notre IP sur l'entrée DNS correspondante si elle a changé depuis la dernière fois :
+
+	apt-get install ddclient
+
+Au moment de l'installation, on peut déjà préconfigurer certains paramètres :
+
+* DNS service provider : `other`
+* Dynamic DNS server : `www.ovh.com`
+* DNS update protocol : `dyndns2`
+* Username : votre login
+* Password : votre mot de passe (stocké en clair)
+* Network interface : `eth0`
+* DynDns fully qualified domain names : `name.domain.tld`
+
+On peut maintenant modifier le fichier de configuration :
+
+	cp /etc/ddclient.conf /etc/ddclient.conf.default
+	nano /etc/ddclient.conf
+
+et on va changer et ajouter certains paramètres :
+
+	use=web, web=checkip.dyndns.com, web-skip='IP Address'
+	
+	server=www.ovh.com
+	ssl=yes
+
+On redémarre le service avec `service ddclient restart`.
+  
+Pour vérifier que la mise à jour s'est bien effectuée, on peut visualiser le fichier `/var/cache/ddclient/ddclient.cache` et s'assurer que notre domaine pointe bien vers notre dernière IP.
 
 ## SSH
 
