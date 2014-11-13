@@ -152,6 +152,7 @@ Normalement on a déjà fait une première configuration pour sécuriser le serv
 On peut aussi ajouter une alerte lors de chaque connexion SSH.
 Pour cela, il suffit d'ajouter le fichier `/etc/ssh/sshrc` et d'y ajouter les actions souhaitées :
 
+	(
 	IP=`echo $SSH_CONNECTION | awk '{print $1}'`
 	REVERSE=`dig -x $IP +short`
 	if [ -z ${REVERSE} ]
@@ -159,8 +160,10 @@ Pour cela, il suffit d'ajouter le fichier `/etc/ssh/sshrc` et d'y ajouter les ac
 	fi
 	
 	echo "$USER connected on `hostname -f` from $IP ($REVERSE)" | mail -s "SSH connection" you@domain.tld
+	) &
 
-Le fait de déterminer le reverse de l'IP pour prendre plus de temps au moment de la connexion. Si c'est trop gênant, il suffit de le désactiver.
+Le fait de déterminer le reverse de l'IP pour prendre plus de temps au moment de la connexion, c'est pour ça qu'on effectue l'opération dans un processus fils. Si c'est cependant encore trop gênant, il suffit de le désactiver.  
+Le paquet `dnsutils` est nécessaire pour que la commande `dig` fonctionne.
 
 _Pour que l'envoie d'email fonctionne, on configurera `ssmtp` dans la suite._
 
