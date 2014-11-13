@@ -225,6 +225,7 @@ Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2
 	maxretry = 3
 	
 	destemail = you@domain.tld
+	mta = mail
 	action = %(action_mwl)s
 
 Ensuite, activer ou modifier les jails selon vos préférences. D'une manière générale n'hésitez pas à abaisser le nombre d'essais avant un bannissement.  
