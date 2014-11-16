@@ -359,7 +359,7 @@ _Personnellement, pour mieux me répérer, je préfixe tous mes fichiers vhost d
 
 	<VirtualHost _default_:443>
 		ServerName default.local
-		DocumentRoot /var/www/
+		Redirect / https://google.com
 
 		SSLEngine on
 		SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem

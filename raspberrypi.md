@@ -3,6 +3,20 @@
 Ce guide a été effectué et mis à jour pour une installation de Rapbian sur un Rapsberry Pi, dans l'optique de l'utiliser comme serveur.
 
 * [Graver Raspbian sur une carte SD](#graver-raspbian-sur-une-carte-sd)
+* [Premier démarrage](#premier-démarrage)
+* [Configuration initiale](#configuration-initiale)
+	* [Nom du serveur](#nom-du-serveur)
+	* [Attribution IP fixe](#attribution-ip-fixe)
+	* [Package sudo](#package-sudo)
+	* [Comptes utilisateurs](#comptes-utilisateurs)
+	* [Sécurisation de SSH](#sécurisation-de-ssh)
+	* [Prise en compte](#prise-en-compte)
+* [Configuration pour serveur](#configuration-pour-serveur)
+	* [Suppression des paquets](#suppression-des-paquets)
+	* [Mises à jour](#mises-à-jour)
+	* [Paquet rpi-update](#paquet-rpi-update)
+	* [Wake On Lan](#wake-on-lan)
+* [Installation de services](#installation-de-services)
 
 
 ***
