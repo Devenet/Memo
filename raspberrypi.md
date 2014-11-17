@@ -234,14 +234,19 @@ Pour la suite, il suffit de vous reporter au document [debian.md](https://github
 ## Plugins Munin
 
 Une fois le nœud Munin installé, il existe des plugins propres pour les Raspberry Pi, dont un intéressant : celui de la température du CPU.  
-Pour cela, on récupère le script qu'on enregistre et qu'on rend exécutable :
+Pour cela, on récupère le script (basé sur [pisense](https://github.com/perception101/pisense)) qu'on enregistre et qu'on rend exécutable :
 
-	wget https://raw.githubusercontent.com/perception101/pisense/master/pisense_ -O /usr/share/munin/plugins/pisense_
+	wget https://raw.githubusercontent.com/nicolabricot/Memo/master/ressources/munin_pisense -O /usr/share/munin/plugins/pisense_
  	chmod +x /usr/share/munin/plugins/pisense_
 
 On peut ensuite l'ajouter dans le nœud Munin :
 
 	ln -s /usr/share/munin/plugins/pisense_ /etc/munin/plugins/pisense_temp
+
+en présicant dans `/etc/munin/plugin-conf.d/munin-node` 
+
+	[pisense_*]
+	user_root 
 
 On n'oublie pas de redémarrer les services
 
