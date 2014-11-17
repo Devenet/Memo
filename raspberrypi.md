@@ -17,6 +17,7 @@ Ce guide a été effectué et mis à jour pour une installation de Rapbian sur u
 	* [Paquet rpi-update](#paquet-rpi-update)
 	* [Wake On Lan](#wake-on-lan)
 * [Installation de services](#installation-de-services)
+	* [Plugins Munin](#plugins-munin)
 
 
 ***
@@ -229,3 +230,20 @@ Pour stocker les données, je vous conseille de créer le répertoire racine `da
 Si vous avez une clef USB ou disque dur (à ne pas garder au format NTFS pour des raisons de performances) qui y est monté, placer y plutôt les données dessus pour éviter toute perte de données si le RBPi crachait pour une raison inconnue…
 
 Pour la suite, il suffit de vous reporter au document [debian.md](https://github.com/nicolabricot/Memo/blob/master/debian.md) pour installer et configurer les différents services que vous souhaitez pour votre serveur RBPi :-)
+
+## Plugins Munin
+
+Une fois le nœud Munin installé, il existe des plugins propres pour les Raspberry Pi, dont un intéressant : celui de la température du CPU.  
+Pour cela, on récupère le script qu'on enregistre et qu'on rend exécutable :
+
+	wget https://raw.githubusercontent.com/perception101/pisense/master/pisense_ -O /usr/share/munin/plugins/pisense_
+ 	chmod +x /usr/share/munin/plugins/pisense_
+
+On peut ensuite l'ajouter dans le nœud Munin :
+
+	ln -s /usr/share/munin/plugins/pisense_ /etc/munin/plugins/pisense_temp
+
+On n'oublie pas de redémarrer les services
+
+	service munin-node restart
+
