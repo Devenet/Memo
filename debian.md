@@ -7,7 +7,7 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 * [Première connexion](#première-connexion)
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
   * [Hostname](#hostname) 
-  * [SSH](#ssh)
+  * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
   * [Utilitaires](#utilitaires) : _[ssmtp](#ssmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron)_
   * [Apache2 et PHP 5](#apache-2-et-php-5) : _[Installation et configuration](#installation-et-configuration), [Virtual hosts](#virtual-hosts), [Activation du SSL (HTTPS)](activation-du-ssl-https), [Application des paramètres](#application-des-paramètres)_
   * [Git](#git)
@@ -147,7 +147,10 @@ Pour vérifier que la mise à jour s'est bien effectuée, on peut visualiser le 
 
 ## SSH
 
-Normalement on a déjà fait une première configuration pour sécuriser le service.
+Normalement on a déjà fait une première configuration pour sécuriser le service.  
+Sinon on effectue les [changements](#première-connexion) !
+
+### Notification de connexion
 
 On peut aussi ajouter une alerte lors de chaque connexion SSH.
 Pour cela, il suffit d'ajouter le fichier `/etc/ssh/sshrc` et d'y ajouter les actions souhaitées :
@@ -166,6 +169,14 @@ Le fait de déterminer le reverse de l'IP pour prendre plus de temps au moment d
 Le paquet `dnsutils` est nécessaire pour que la commande `dig` fonctionne.
 
 _Pour que l'envoie d'email fonctionne, on configurera `ssmtp` dans la suite._
+
+### Message of the Day
+
+Lors de la connexion (locale ou SSH) un message de bienvenue accueille l'utilisateur lors d'une connexion en ligne de commande.
+
+Pour personnaliser ce message, il suffit de modifier (ou créer s'il n'existe pas) le fichier `/etc/motd`.
+
+
 
 ## Utilitaires
 
