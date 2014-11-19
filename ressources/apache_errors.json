@@ -1,0 +1,33 @@
+[
+	{
+		"error": 401,
+		"title": "Authorization Required",
+		"message": "This server could not verify that you are authorized to access the document requested. Either you supplied the wrong credentials (e.g., bad password), or your browser doesn't understand how to supply the credentials required."
+	},
+	{
+		"error": 403,
+		"title": "Forbidden",
+		"message": "You don't have permission to access /FILE_URL on this server."
+	},
+	{
+		"error": 404,
+		"title": "Not Found",
+		"message": "The requested URL /FILE_URL was not found on this server."
+	},
+	{
+		"error": 410,
+		"title": "Gone",
+		"message": "The requested resource /FILE_URL is no longer available on this server and there is no forwarding address. Please remove all references to this resource."
+	},
+	{
+		"error": 500,
+		"title": "Internal Server Error",
+		"message": "The server encountered an internal error or misconfiguration and was unable to complete your request. \nPlease contact the server administrator, email@domain.tld and inform them of the time the error occurred, and anything you might have done that may have caused the error. \nMore information about this error may be available in the server error log."
+	},
+	{
+		"error": 503,
+		"title": "Service Temporarily Unavailable",
+		"message": "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later."
+		
+	}
+]
