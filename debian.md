@@ -650,6 +650,50 @@ Il suffit de modifier le fichier `/usr/bin/munin-cron` en :
 
 Ici, on ne génère le HTML et les graphes que toutes les `30` minutes.
 
+#### Graphes récapitulatifs
+
+Si vous monitrez plusieurs hosts, en ples des pages de comparaison, vous souhaitez peut-être avoir sur le même graphe des courbes de comparaison de vos nœuds, ou simplement avoir un graphe totalisant les valeurs d'un même type de graphe pour tous vos nœuds.
+
+Pour cela, il est nécessaire de modifier le fichier de configuration du serveur Munin `/etc/munin/munin.conf` et d'y ajouter un nœud virtuel.
+
+	[domain.tld;global]
+        update no
+
+        # loads
+        load.graph_title Load average
+        load.graph_category system
+        load.graph_order myhost=myhost.domain.tld:load.load other-host=other-host.domain.tld:load.load
+
+        # uptime
+        uptime.graph_title Uptime
+        uptime.graph_category system
+        uptime.graph_order myhost=myhost.domain.tld:uptime.uptime other-host=other-host.domain.tld:up
+
+        # bandwidth
+        bandwidth.graph_args --base 1000 -l 0
+        bandwidth.cdef 0
+        bandwidth.graph_category network
+        bandwidth.graph_title Bandwidth
+        bandwidth.graph_vlabel bits/sec
+        bandwidth.upload.label upload
+        bandwidth.total.graph yes
+        bandwidth.upload.sum \
+            myhost.domain.tld:if_eth0.up \
+            other-host.domain.tld:if_eth0.up
+        bandwidth.upload.type COUNTER
+        bandwidth.download.type COUNTER
+        bandwidth.download.label download
+        bandwidth.graph_order upload download
+        bandwidth.total.graph no
+        bandwidth.download.sum \
+            myhost.domain.tld:if_eth0.down \
+            other-host.domain.tld:if_eth0.down
+
+    [domain.tld;]
+        node_order myhost.domain.tld other-host.domain.tld global
+
+La dernière directive permet de changer l'ordre d'affichage (par défaut alphabétique).  
+En fonction des graphes globaux que vous souhaitez, n'hésitez pas à adapter la configuration.
 
 ## ownCloud
 
