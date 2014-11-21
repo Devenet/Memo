@@ -763,19 +763,7 @@ On peut maintenant modifier le fichier `/etc/rsnapshot.conf` avec notre configur
 	backup		/data/git/				server/
 	backup		/data/www/				server/
 	
-	backup		/etc/apache2/			server/
-	backup		/etc/apticron/			server/
-	backup		/etc/fail2ban/			server/
-	backup		/etc/hostname			server/
-	backup		/etc/hosts				server/
-	backup		/etc/logwatch/			server/
-	backup		/etc/motd				server/
-	backup		/etc/munin/				server/
-	backup		/etc/rsnapshot.conf		server/
-	backup		/etc/ssh/				server/
-	backup		/etc/ssl/public/		server/
-	backup		/etc/ssl/private/		server/
-	backup		/etc/ssmtp/				server/
+	backup		/etc/			server/
 
 	backup		/var/spool/cron/crontabs/		server/
 
