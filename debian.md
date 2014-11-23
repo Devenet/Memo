@@ -339,6 +339,13 @@ On peut aussi en profiter pour modifier le paramètre `DirectoryIndex` (ordre de
 
 	 DirectoryIndex index.php index.html index.htm
 
+
+#### Envoi d'e-mails
+
+Penser à modifier le fichier `/etc/passwd` pour mettre à jour l'utilisateur `www-data` avec quelque chose de plus friendly si Apache est amené à envoyer des e-mails :
+
+	www-data:x:33:33:Server Name:/var/www:/bin/sh
+
 ### Virtual hosts
 
 Pour servir plusieurs sites web avec des noms de domaines différents, on va utiliser les vhosts d'Apache.
