@@ -290,7 +290,7 @@ That's it.
 Il suffit d'installer les paquages suivants :
 
 
-	apt-get install apache2 php5 php5-sqlite memcached php5-memchached
+	apt-get install apache2 php5 php5-sqlite memcached php5-memcached
 
 On va commencer par sécuriser un peu ça, puis activer les modules couramment utilisés.
 
