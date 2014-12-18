@@ -1,8 +1,26 @@
 # Astuces Git
 
+* [Récupérer son remisage](#récupérer-son-remisage)
 * [Antidater son dernier commit](#antidater-son-dernier-commit)
 
 ***
+
+## Récupérer son remisage
+
+On parcourt la liste des remisages effectués avec
+
+	git stash list
+
+Pour appliquer le dernier remisage effectué (le plus récent) :
+
+	git stash apply
+
+Si vous souhaitez récupérer le remisage numéro `x` en particulier, il suffit de le préciser :
+
+	git stash apply stash@{x}
+
+On peut maintenant reprendre la suite.
+
 
 ## Antidater son dernier commit
 
