@@ -289,7 +289,6 @@ That's it.
 
 Reportez-vous au document [Installation et configuration d'Apache 2 et PHP 5](https://github.com/nicolabricot/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
 
-
 ## Git
 
 On installe juste de quoi cloner et mettre à jour un dépôt :
