@@ -1,4 +1,4 @@
-# Raspberry Pi
+# Installation et configuration d'un Raspberry Pi
 
 Ce guide a été effectué et mis à jour pour une installation de Rapbian sur un Rapsberry Pi, dans l'optique de l'utiliser comme serveur.
 
