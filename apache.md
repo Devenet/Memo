@@ -13,6 +13,7 @@ Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir
 	* [Default vhost](#default-vhost)
 	* [Local vhost](#local-vhost)
 	* [Generic vhost](#generic-vhost)
+	* [Proxy vhost](#proxy-vhost)
 * [Authentification](#authentification)
 * [Activation du SSL (HHTPS)](#activation-du-ssl-https)
 	* [Certificat auto-signé](#certificat-auto-signé)
@@ -183,6 +184,45 @@ Une fois que les deux précédents vhosts sont configurés, on peut maintenant c
 		LogLevel warn
 		CustomLog ${APACHE_LOG_DIR}/access.log vhost_combined
 	</VirtualHost>
+
+### Proxy vhosts
+
+Apache permet de configurer un virtual host pour l'utiliser comme un peoxy et accéder à un élément de réseau interne qui n'est (directement) pas accessible depuis l'extérieur.  
+Par exemple si l'on souhaite pouvoir accéder au site web hébergé sur `192.168.1.1` (l'administration de votre box par exemple) qui n'est pas accessible depuis Internet, on peut configuer un vhost pour qu'il fasse le relais.
+
+__Notez bien que cela peut faciliter le piratage de votre réseau, à faire en connaissance de cause !__
+
+On commence par installer et activer les modules nécessaires :
+
+	a2enmod proxy
+	a2enmod proxy_http
+
+Puis on configure le vhost :
+
+	<VirtualHost *:80>
+		ServerName something.domain.tld
+
+		ProxyPass               /       http://192.168.1.1/
+		ProxyPassReverse        /       http://192.168.1.1/
+		ProxyRequests           Off
+		ProxyPreserveHost       Off
+		SSLProxyEngine          On
+		<Proxy *>
+				Order Deny,Allow
+				Allow from all
+
+				Include /data/apache/conf/auth_server.conf
+				Require group administrators
+		</Proxy>
+
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+		LogLevel warn
+		CustomLog ${APACHE_LOG_DIR}/access.log vhost_combined
+	</VirtualHost>
+
+Il suffit d'activer le vhost et de relancer Apache.  
+
+Voir la section [Authentification](#authentification) pour que tout le monde ne puisse pas y accéder.
 
 ## Authentification
 
