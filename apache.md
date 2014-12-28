@@ -12,7 +12,7 @@ Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir
 * [Virual hosts](#virutal-hosts)
 	* [Default vhost](#default-vhost)
 	* [Local vhost](#local-vhost)
-	* [Generic vhost](#generic-vhost)
+	* [Generic vhosts](#generic-vhosts)
 	* [Proxy vhost](#proxy-vhost)
 * [Authentification](#authentification)
 * [Activation du SSL (HHTPS)](#activation-du-ssl-https)
@@ -185,7 +185,7 @@ Une fois que les deux précédents vhosts sont configurés, on peut maintenant c
 		CustomLog ${APACHE_LOG_DIR}/access.log vhost_combined
 	</VirtualHost>
 
-### Proxy vhosts
+### Proxy vhost
 
 Apache permet de configurer un virtual host pour l'utiliser comme un peoxy et accéder à un élément de réseau interne qui n'est (directement) pas accessible depuis l'extérieur.  
 Par exemple si l'on souhaite pouvoir accéder au site web hébergé sur `192.168.1.1` (l'administration de votre box par exemple) qui n'est pas accessible depuis Internet, on peut configuer un vhost pour qu'il fasse le relais.
