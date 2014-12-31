@@ -5,6 +5,12 @@
 
 ***
 
+## Faire un remisage
+
+Pour récupérer un espace de travail propre sans perdre ses modifications et sans commiter, on peut remiser son travail actuel et le récupérer plus tard, grâce à la commande  
+
+	git stash
+
 ## Récupérer son remisage
 
 On parcourt la liste des remisages effectués avec
