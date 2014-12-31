@@ -1,5 +1,6 @@
 # Astuces Git
 
+* [Faire un remisage](#faire-un-remisage)
 * [Récupérer son remisage](#récupérer-son-remisage)
 * [Antidater son dernier commit](#antidater-son-dernier-commit)
 
