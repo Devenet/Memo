@@ -2,6 +2,7 @@
 
 * [Faire un remisage](#faire-un-remisage)
 * [Récupérer son remisage](#récupérer-son-remisage)
+* [Cloner un repository avec seulement les derniers commits](#cloner-un-repository-avec-seulement-les-derniers-commits)
 * [Antidater son dernier commit](#antidater-son-dernier-commit)
 
 ***
@@ -28,6 +29,15 @@ Si vous souhaitez récupérer le remisage numéro `x` en particulier, il suffit 
 
 On peut maintenant reprendre la suite.
 
+***
+
+## Cloner un repository avec seulement les derniers commits
+
+Lorsque l'on clone un dépôt Git, tout l'historique est récupéré. Il n'est pas toujours nécessaire de les récupérer tous, il est possible en précisant la profondeur de ne récupérer qu'un certain nombres de commit depuis la dernière version
+
+	git clone --depth=5 https://github.com/nicolabricot/Memo.git memo
+
+***
 
 ## Antidater son dernier commit
 
