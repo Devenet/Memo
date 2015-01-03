@@ -1,9 +1,37 @@
 # Astuces Git
 
+* [Ajouter ses clefs de connexion Git SSH](#ajout-ses-clefs-de-connexion-git-ssh)
 * [Faire un remisage](#faire-un-remisage)
 * [Récupérer son remisage](#récupérer-son-remisage)
 * [Cloner un repository avec seulement les derniers commits](#cloner-un-repository-avec-seulement-les-derniers-commits)
 * [Antidater son dernier commit](#antidater-son-dernier-commit)
+
+***
+
+## Ajouter ses clefs de connexion Git SSH
+
+Pour ajouter ses clefs, il faut normalement faire la démarche suivante :
+
+	ssh-agent /bin/bash
+	ssh-add ~/.ssh/id_rsa
+
+Au redémarrage de votre machine, les clefs seront bien ajoutées, mais ce n'est pas le cas si vous vous loguez.  
+
+Pour éviter cela, il faut les ajouter dans le fichier `#/.ssh/config` file :
+
+	IdentityFile ~/.ssh/id_rsa
+
+La configuration ne s'applique qu'à l'utilisateur concerné.  
+Pour que tous les utilisateurs soient concernés, il suffit de mettre la configuration dans le fichier `/etc/ssh/ssh_config`.
+
+Petit bonus : actuellement la clef ajoutée sera testée pour toute connexion, quel que soit l'hôte. Pour restreindre la clef à un hôte spécifique :
+
+	Host domain.tld
+    	HostName domain.tld
+    	User git
+    	IdentityFile ~/.ssh/id_rsa
+
+_Astuces tirées de [Add private key permanently with ssh-add on Ubuntu](https://stackoverflow.com/questions/3466626/add-private-key-permanently-with-ssh-add-on-ubuntu/4246809#4246809)._
 
 ***
 
