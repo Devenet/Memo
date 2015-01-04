@@ -4,6 +4,7 @@
 * [Faire un remisage](#faire-un-remisage)
 * [Récupérer son remisage](#récupérer-son-remisage)
 * [Cloner un repository avec seulement les derniers commits](#cloner-un-repository-avec-seulement-les-derniers-commits)
+* [Supprimer tous les anciens commits d'un historique Git](#supprimer-tous-les-anciens-commit-dun-historique-git)
 * [Antidater son dernier commit](#antidater-son-dernier-commit)
 
 ***
@@ -15,7 +16,7 @@ Pour ajouter ses clefs, il faut normalement faire la démarche suivante :
 	ssh-agent /bin/bash
 	ssh-add ~/.ssh/id_rsa
 
-Au redémarrage de votre machine, les clefs seront bien ajoutées, mais ce n'est pas le cas si vous vous loguez.  
+Au redémarrage de votre machine, les clefs seront bien ajoutées, mais ce n'est pas le cas si vous vous loguez de nouveau.  
 
 Pour éviter cela, il faut les ajouter dans le fichier `#/.ssh/config` file :
 
@@ -61,9 +62,30 @@ On peut maintenant reprendre la suite.
 
 ## Cloner un repository avec seulement les derniers commits
 
-Lorsque l'on clone un dépôt Git, tout l'historique est récupéré. Il n'est pas toujours nécessaire de les récupérer tous, il est possible en précisant la profondeur de ne récupérer qu'un certain nombres de commit depuis la dernière version
+Lorsque l'on clone un dépôt Git, tout l'historique est récupéré. Il n'est pas toujours nécessaire de les récupérer tous, il est possible en précisant la profondeur de ne récupérer qu'un certain nombres de commit depuis la dernière version :
 
 	git clone --depth=5 https://github.com/nicolabricot/Memo.git memo
+
+Cela permet de ne récupérer que les 5 derniers commits par exemple.
+
+## Supprimer tous les anciens commits d'un historique Git
+
+Il faut commencer par récupérer le hash correspondant au dernier commit, par exemple `a089db6`.  
+
+Ensuite, en passant par une branche orpheline on peut réécrire la branche master :
+
+	git checkout --orphan temp a089db6
+	git commit -m "Truncated history"
+	git rebase --onto temp a089db6 master
+	git branch -D temp 
+
+Pour que les modifications soient prises en compte sur le serveur distant de référence, il faut forcer la mise à jour avec 
+
+	git push --force
+
+Ce genre d'opération est à réserver pour un dépôt privé !
+
+_[Source](http://web.archive.org/web/20130116195128/http://bogdan.org.ua/2011/03/28/how-to-truncate-git-history-sample-script-included.html) et [inspiration](https://stackoverflow.com/questions/17673771/git-remove-earlier-commit-but-keep-recent-changes)._
 
 ***
 
