@@ -3,6 +3,7 @@
 * [Ajouter ses clefs de connexion Git SSH](#ajout-ses-clefs-de-connexion-git-ssh)
 * [Faire un remisage](#faire-un-remisage)
 * [Récupérer son remisage](#récupérer-son-remisage)
+* [Créer une branche vide](#créer-une-branche-vide)
 * [Cloner un repository avec seulement les derniers commits](#cloner-un-repository-avec-seulement-les-derniers-commits)
 * [Supprimer tous les anciens commits d'un historique Git](#supprimer-tous-les-anciens-commit-dun-historique-git)
 * [Antidater son dernier commit](#antidater-son-dernier-commit)
@@ -57,6 +58,20 @@ Si vous souhaitez récupérer le remisage numéro `x` en particulier, il suffit 
 	git stash apply stash@{x}
 
 On peut maintenant reprendre la suite.
+
+***
+
+## Créer une branche vide
+
+Si pour une certaine raison vous souhaitez créer une branche "vide", c'est-à-dire sans historique des précédentes commits, il suffit de préciser que vous souhaiter une branche "orpheline" :
+
+	git checkout --orphan nouvelle-branche
+
+Il peut être utile de supprimer les fichiers présents dans le répetoire avec :
+
+	git rm -rf .
+
+pour ne pas être polluer des fichiers de la branche principale.
 
 ***
 
