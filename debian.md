@@ -77,7 +77,7 @@ Avant l'installation d'un paquet, on vérifie toujours que son système est à j
 
 	apt-get update && apt-get upgrade
 
-Comme on a créé la partition `/data` pour stocker nos données, c'est dedans qu'on mettre les données voire certains fichiers de configuration partagés.  
+Comme on a créé la partition `/data` pour stocker nos données, c'est dedans qu'on va mettre les données voire certains fichiers de configuration partagés.  
 Au niveau de l'arborescence, j'ai fait le choix suivant :
 
 	/data
@@ -87,9 +87,6 @@ Au niveau de l'arborescence, j'ai fait le choix suivant :
 		/cloud
 		/git
 			/some-repository
-		/script
-			/shell
-			/cron
 		/www
 			/owncloud
 			/some-vhost
@@ -105,11 +102,11 @@ On va modifier le fichier `/etc/hosts` pour y ajouter notre nom de domaine compl
 
 On peut vérifier que c'est correct avec `hostname` puis `hostname -f`.
 
-_Si l'on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il faudrait modifier le fichier `/etc/network/interfaces`._
+_Si l'on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il faudrait modifier le fichier `/etc/network/interfaces`, voir [Attribution d'une IP fixe](https://github.com/nicolabricot/Memo/blob/master/raspberrypi.md#attribution-ip-fixe)._
 
 ### IP externe dynamique
 
-Si votre serveur est hebergé par un professionnel ou que vous avez une IP fixe, il suffit de modifier vos entrées DNS pour que `name.domain.tld` pointe vers l'IP externe de votre serveur.  
+Si votre serveur est hebergé par un professionnel ou que vous avez une IP fixe, il suffit de modifier vos entrées DNS pour que `name.domain.tld` pointe vers l'IP externe de votre serveur, et vous pouvez passer à la suite.  
 
 Dans le cas où l'on ne possède qu'une adresse IP dynamique, il va falloir ruser en mettant à jour notre enregistrement DNS à chaque fois que l'IP change.  
 On a différentes manières de le faire, dont utiliser un service externe : DynDNS (payant maintenant !), No-Ip (limité à 3 hosts pour le compte gratuit), DynHost d'OVH, ...  
@@ -165,10 +162,10 @@ Pour cela, il suffit d'ajouter le fichier `/etc/ssh/sshrc` et d'y ajouter les ac
 	echo "$USER connected on `hostname -f` from $IP ($REVERSE)" | mail -s "SSH connection" you@domain.tld
 	) &
 
-Le fait de déterminer le reverse de l'IP pour prendre plus de temps au moment de la connexion, c'est pour ça qu'on effectue l'opération dans un processus fils. Si c'est cependant encore trop gênant, il suffit de le désactiver.  
+Le fait de déterminer le reverse de l'IP peut prendre plus de temps au moment de la connexion, c'est pour ça qu'on effectue l'opération dans un processus fils. Si c'est cependant encore trop gênant, il suffit de le désactiver.  
 Le paquet `dnsutils` est nécessaire pour que la commande `dig` fonctionne.
 
-_Pour que l'envoie d'email fonctionne, on configurera `ssmtp` dans la suite._
+_Pour que l'envoi d'email fonctionne, on configurera `ssmtp` dans [la suite](#ssmtp)._
 
 ### Message of the Day
 
@@ -208,7 +205,7 @@ Penser à modifier le fichier `/etc/passwd` pour mettre à jour le nom des utili
 
 #### Réponse automatique
 
-J'ai choisi que la boîte email du serveur ne servirait qu'à envoyer des emails, j'ai donc mis en place une réponse automatique :
+J'ai choisi que la boîte email du serveur ne servirait qu'à envoyer des emails, j'ai donc mis en place une réponse automatique (côté fournisseur de mon adresse email) :
 
 	Hello
 
@@ -295,11 +292,14 @@ On installe juste de quoi cloner et mettre à jour un dépôt :
 
 	apt-get install git-core
 
-Sauf exception, les dépôts git seront clonés dans `/data/git`, et on fera des liens symboliques vers les dépôts si besoin (permet, sauf exception, de rationnaliser).
+Sauf exception, les dépôts git seront clonés dans `/data/git`, et on fera des liens symboliques  vers les dépôts si besoin (permet, sauf exception, de rationnaliser).
 
 	ln -s /data/git/moodpicker /data/www/vhost/moods
-	
-Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne soit pas accessible en ajoutant dans `/etc/apache2/conf.d/security` les directives suivantes si ce n'a pas déjà été fait :
+
+permet de faire une lien depuis la source `moodpicker` réelle vers le lien virtuel `moods`. 
+
+
+Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne soit pas accessible en ajoutant dans `/etc/apache2/conf.d/security` les directives suivantes, si ce n'est pas déjà fait :
 
 	<DirectoryMatch "/\.git">
 		Deny from all
@@ -309,7 +309,7 @@ Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne s
 
 ## Munin
 
-Munin "server" récupère les infos sur les Munin "nodes". Notre Dedibox sera donc forcément un nœud, mais sera aussi le serveur pour les autres nœuds de notre réseau.
+Munin "server" récupère les infos à partir des Munin "nodes". Notre Dedibox sera donc forcément un nœud, mais sera aussi le serveur pour les autres nœuds de notre réseau.
 
 On va donc installer simplement :
 
@@ -334,7 +334,7 @@ _Si, malheureusement, le serveur (qui héberge Munin serveur) a une adresse IP d
 
 	allow ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
 
-_Néanmoins, celle solution n'est pas tip-top, et est donc à éviter !_
+_Néanmoins, celle solution permet à n'importe qui connaissant votre IP de demander et recevoir les informations, ce qui est donc à éviter !_
 
 #### Plugins
 
@@ -366,7 +366,7 @@ La configuration se fait dans `/etc/munin/munin.conf` :
     	use_node_name yes
     	contacts you
 	
-On supprime le lien symbolique que Munin a ajouté dans `/etc/apache2/conf.d` qui a pour conséquence que chaque vhost suivi de `/munin` affiche Munin :/
+On supprime le lien symbolique que Munin a ajouté dans `/etc/apache2/conf.d` qui a pour conséquence que chaque vhost Apache suivi de `/munin` affiche Munin :/
 
 	rm /etc/apache2/conf.d/munin
 
@@ -392,7 +392,7 @@ Vous verrez le changement lors de la prochaine itération de Munin.
 
 #### Tâche CRON
 
-Par défaut Munin server s'exécute toutes les 5 minutes, pour récupérer les données, et générer le HTML et les graphes. Cela peut utiliser beaucoup de ressources (sur un Rapsberry Pi par exemple) ; on peut donc générer le HTML et les graphes moins régulièrement.
+Par défaut Munin server s'exécute toutes les 5 minutes pour récupérer les données et générer le HTML et les graphes. Cela peut utiliser beaucoup de ressources (sur un Rapsberry Pi par exemple) ; on peut donc générer le HTML et les graphes moins régulièrement.
 
 Il suffit de modifier le fichier `/usr/bin/munin-cron` en :
 
@@ -413,7 +413,7 @@ Ici, on ne génère le HTML et les graphes que toutes les `30` minutes.
 
 #### Graphes récapitulatifs
 
-Si vous monitrez plusieurs hosts, en ples des pages de comparaison, vous souhaitez peut-être avoir sur le même graphe des courbes de comparaison de vos nœuds, ou simplement avoir un graphe totalisant les valeurs d'un même type de graphe pour tous vos nœuds.
+Si vous monitorez plusieurs hosts, en plus des pages de comparaison, vous souhaitez peut-être avoir sur le même graphe des courbes de comparaison de vos nœuds, ou simplement avoir un graphe totalisant les valeurs d'un même type de graphe pour tous vos nœuds.
 
 Pour cela, il est nécessaire de modifier le fichier de configuration du serveur Munin `/etc/munin/munin.conf` et d'y ajouter un nœud virtuel.
 
@@ -470,7 +470,7 @@ On installe aussi le support de PHP GD :
 
 	apt-get install php5-gd
 	
-On créé ensuite un vhost dans Apache et on peut ensuite accéder à l'URL souhaitée pour la configuration.  
+On créé ensuite un vhost dans Apache et on peut accéder à l'URL souhaitée pour la configuration.  
 
 Si vous ne disposez que de peu d'utilisateurs qui s'y connecteront (ou pour de petites machines), il suffit de choisir SQLite comme base de données. Sinon on prendra MySQL.
 
@@ -528,7 +528,7 @@ On peut maintenant modifier le fichier `/etc/rsnapshot.conf` avec notre configur
 
 	backup		/var/spool/cron/crontabs/		server/
 
-* Les intervalles sont à choisir en fonction de ce que vous souhaitez et quelle sécurité de sauvegarde vous souhaitez.
+* Les intervalles sont à choisir en fonction de ce que vous voulez et de la sécurité des sauvegardes vous souhaitez.
 * Les répertoires à sauvegarder aussi ; dans mon cas je sauvegarde les données présentes sur `/data` et les fichiers de configuration intéressants de `/etc`.
 * Il est possible de faire exécuter un script avant et après l'exécution de rsnapshot avec `cmd_preexec` ou `cmd_postexec`.
 * Vérifier bien que ce sont de vraies tabulations qui séparent les données.
@@ -555,12 +555,12 @@ Pour effectuer une sauvergarde locale non programmée, la commande suivante suff
 
 	 rsnapshot hourly
 
-Alors, on a une sauvegarde locale de l'état de nos données à différents moments. Ainsi, on peut récupérer un document dans son état la veille, etc.  
+Ainsi, on a une sauvegarde locale de l'état de nos données à différents moments. On peut donc récupérer un document dans son état la veille, etc.  
 Seulement ces backups sont stockés localement, on va donc devoir en faire une sauvegarde autre part.
 
 ## Sauvegardes externes
 
-Pour sécuriser nos sauvergardes locales incrémentales, on va utiliser l'espace de stockage FTP fourni.  
+Pour sécuriser nos sauvergardes locales incrémentales, on va utiliser l'espace de stockage FTP fourni dans l'offre Dédibox.  
 Le paquet `rsync` ne permet pas directement de sauvegarder sur un FTP, on va donc utiliser `backup-manager` :
 
 	apt-get install backup-manager
@@ -588,7 +588,7 @@ On peut ensuite lancer manuellement la copie pour s'assurer que tout se passe bi
 
 	backup-manager
 
-Pour vérifier que notre archive a bien été déposée, on se connecter au FTP
+Pour vérifier que notre archive a bien été déposée, on se connecte au FTP
 
 	ftp -n ftp-host.domain.tld
 	ftp> user ftp-user ftp-password
@@ -600,7 +600,7 @@ On peut maintenant automatiser ce backup.
 
 ### Automatisation
 
-Comme pour les sauvegardes locales, on utiliser les tâches CRON :
+Comme pour les sauvegardes locales, on utilise les tâches CRON :
 
 	crontab -u root -e
 	
@@ -610,7 +610,7 @@ Ici, les sauvergades seront envoyées sur le serveur FTP tous les jours à 1 heu
 
 ## Vérification/récupération d'une sauvegarde
 
-C'est bien on a mis en place une sauvegarde locale incrémentale et une sauvergade externe des ces sauvegardes incrémentales.  
+C'est bien on a mis en place une sauvegarde locale incrémentale et une sauvergade externe de ces sauvegardes incrémentales.  
 Mettons nous dans le cas où nous aurions besoin de récupérer une sauvegarde !
 
 ### Sauvegerde locale
@@ -641,5 +641,4 @@ On a maintenant le fichier en local, qu'on extrait et que l'on peut parcourir po
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faie qu'en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu'elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n'avez pas oublié des fichiers à sauvegarde ;-)
-
 
