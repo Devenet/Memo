@@ -25,7 +25,7 @@ Ce guide a été effectué et mis à jour pour une installation de Rapbian sur u
 # Graver Raspbian sur une carte SD
 
 Mon seul lecteur de carte étant sur un Mac pour le moment, voici les différentes étapes à effectuer pour rendre bootable sa carte SD avec une image de Raspbian.  
-La démarche peut-être adapter pour n'importe quelle distribution (OpenElec, …).
+La démarche peut-être adaptée pour n'importe quelle distribution (OpenElec, …).
 
 On télécharge d'abord la dernière version de Raspbian, par exemple depuis le site [raspberrypi.org](http://www.raspberrypi.org/downloads/).
 
@@ -49,9 +49,9 @@ Une fois l'opération terminée, on est prêt pour la suite.
 
 # Premier démarrage
 
-Penser à brancher un clavier USB ainsi que d'avoir un écran (ou une TV) avec un port HDMI.
+Penser à brancher un clavier USB ainsi qu'avoir un écran (ou une TV) avec un port HDMI.
 
-On tombe sur un écran « Setup Options ». On va d'abord éteindre la partition sur toute la carte SD :
+On tombe sur un écran « Setup Options ». On va d'abord étendre la partition sur toute la carte SD :
 
 	1 Expand Filesystem > Enter
 	
@@ -111,7 +111,7 @@ et dans le fichier `/etc/hostname` :
 
 	server
 
-_Il se peut que le hostname soit plus ou moins correct si vous avez lors du premier démarrage utiliser la fonction pour renommer le RBPi._  
+_Il se peut que le hostname soit plus ou moins correct si vous avez lors du premier démarrage utilisé la fonction pour renommer le RBPi._  
 Pour vérifier que c'est correct, on utilise les commandes `hostname` puis `hostname -f`.
 
 ## Attribution IP fixe
@@ -209,7 +209,7 @@ Ainsi, il suffira de lancer la commande `rpi-update` pour mettre à jour le firm
 
 ## Wake On Lan
 
-Pour réveiller depuis le serveur d'autres serveurs ou PC grâce au WoL, je vous conseille d'installer `etherwake`.
+Pour réveiller d'autres serveurs ou PC depuis votre RBPi grâce au WoL, je vous conseille d'installer `etherwake`.
 
 Il faut ensuite créer le fichier `etc/ethers` dans lequel vous mettez l'adresse MAC associée à un nom
 
