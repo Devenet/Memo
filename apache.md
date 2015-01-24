@@ -53,7 +53,7 @@ On décommente (début du fichier normalement) et ajoute le paramétrage pour d�
 
 #### Git et SVN
 
-S'il vous arrice de cloner un dépôt et de l'utiliser, il faut veuiller à ce que les répertoires `.git` ne soient pas accessibles.  
+S'il vous arrive de cloner un dépôt et de l'utiliser, il faut veuiller à ce que les répertoires `.git` ne soient pas accessibles.  
 Pour cela, on modifie le fichier `/etc/apache2/conf.d/security`en décommantant la partie `svn` et en ajoutant une directive pour la partie `git` :
 
 	<DirectoryMatch "/\.svn">
