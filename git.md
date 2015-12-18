@@ -35,6 +35,8 @@ Petit bonus : actuellement la clef ajoutée sera testée pour toute connexion, q
 
 _Astuces tirées de [Add private key permanently with ssh-add on Ubuntu](https://stackoverflow.com/questions/3466626/add-private-key-permanently-with-ssh-add-on-ubuntu/4246809#4246809)._
 
+Pour ajouter une clef de déploiement à un utilisateur virtuel, voir [deployment_key.sh](https://gist.github.com/nicolabricot/2d488601712b2723544e)
+
 ***
 
 ## Faire un remisage
