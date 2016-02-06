@@ -2,6 +2,8 @@
 
 Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir plusieurs sites web.
 
+__La version 2.4 d'Apache est sortie ; ce guide n'a pas encore été mis à jour !__
+
 * [Installation](#installation)
 * [Configuration](#configuration)
 	* [Sécurisation](#sécurisation)
@@ -59,7 +61,7 @@ Pour cela, on modifie le fichier `/etc/apache2/conf.d/security`en décommantant 
 	<DirectoryMatch "/\.svn">
 	       Deny from all
 	       Satisfy all
-	</DirectoryMatch>	
+	</DirectoryMatch>
 	<DirectoryMatch "/\.git">
 	       Deny from all
 	       Satisfy all
@@ -170,7 +172,7 @@ Une fois que les deux précédents vhosts sont configurés, on peut maintenant c
 
 		ServerAdmin you@domain.tld
 		DocumentRoot /data/www/domain.tld
-		
+
 		<Directory /data/www/domain.tld>
 			ErrorDocument 404 /404.html
 		</Directory>
@@ -291,7 +293,7 @@ Pour faciliter la navigation, on ajoute dans le vhost SSL générique un vhost s
 
 	<VirtualHost *:443>
 		ServerName sub.domain.tld
-		
+
 		ServerAdmin you@domain.tld
 		DocumentRoot /data/www/sub.domain.tld
 
