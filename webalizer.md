@@ -14,29 +14,29 @@ Ce guide permet d'installer et configurer Webalizer pour visualiser graphiquemen
 
 Le package `webalizer` est disponible directement depuis Debian ; il suffit de l'installer.
 
-  apt-get install webalizer
+    apt-get install webalizer
 
 ## Configuration
 
 La configuration se fait via le fichier `webalizer.conf` que l'on va modifier
 
-  nano /etc/webalizer/webalizer.conf
+    nano /etc/webalizer/webalizer.conf
 
 De nombreux paramètres sont configurables. Dans notre cas, on va seulement s'assurer que les suivants le sont bien :
 
-  OutputDir /var/www/webalizer
-  ReportTitle Webalizer stats
-  HostName ServerName
-
-  PageType        htm*
-  #PageType       cgi
-  #PageType       phtml
-  #PageType       php3
-  #PageType       pl
-  PageType        php
-
-  # Si votre site web est en HTTPS
-  UseHTTPS       yes
+    OutputDir /var/www/webalizer
+    ReportTitle Webalizer stats
+    HostName ServerName
+    
+    PageType        htm*
+    #PageType       cgi
+    #PageType       phtml
+    #PageType       php3
+    #PageType       pl
+    PageType        php
+    
+    # Si votre site web est en HTTPS
+    UseHTTPS       yes
 
 ### Prise en compte des modifications
 
@@ -50,6 +50,6 @@ Une tâche CRON a automatiquement été créée dans `/etc/cron.daily` et la gé
 
 Pour lancer manuellement l'actualisation des données — notamment après un changement de configuration — il faut lancer la commande en _root_ :
 
-  webalizer
+    webalizer
 
-C'est tout !
+C'est tout ! Ils sont ensuite accessibles via _http://localhost/webalizer_ en fonction de votre configuration Apache.
