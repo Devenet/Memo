@@ -24,8 +24,9 @@ La configuration se fait via le fichier `webalizer.conf` que l'on va modifier
 
 De nombreux paramètres sont configurables. Dans notre cas, on va seulement s'assurer que les suivants le sont bien :
 
+    LogFile /var/log/apache2/access.log
     OutputDir /var/www/webalizer
-    ReportTitle Webalizer stats
+    Incremental  yes
     HostName ServerName
     
     PageType        htm*
