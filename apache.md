@@ -122,6 +122,7 @@ _Personnellement, pour mieux me répérer, je préfixe tous mes fichiers vhost d
 
 	<VirtualHost _default_:80>
 		ServerName default.local
+		DocumentRoot /dev/null
 		Redirect / http://example.net
 
 		ErrorLog ${APACHE_LOG_DIR}/error.log
@@ -131,6 +132,7 @@ _Personnellement, pour mieux me répérer, je préfixe tous mes fichiers vhost d
 
 	<VirtualHost _default_:443>
 		ServerName default.local
+		DocumentRoot /dev/null
 		Redirect / http://example.net
 
 		SSLEngine on
