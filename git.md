@@ -6,7 +6,9 @@
 * [Créer une branche vide](#créer-une-branche-vide)
 * [Cloner un repository avec seulement les derniers commits](#cloner-un-repository-avec-seulement-les-derniers-commits)
 * [Supprimer tous les anciens commits d'un historique Git](#supprimer-tous-les-anciens-commit-dun-historique-git)
+* [Modifier le message de son dernier commit](#modifier-le-message-de-son-dernier-commit)
 * [Antidater son dernier commit](#antidater-son-dernier-commit)
+
 
 ***
 
@@ -105,6 +107,18 @@ Ce genre d'opération est à réserver pour un dépôt privé !
 _[Source](http://web.archive.org/web/20130116195128/http://bogdan.org.ua/2011/03/28/how-to-truncate-git-history-sample-script-included.html) et [inspiration](https://stackoverflow.com/questions/17673771/git-remove-earlier-commit-but-keep-recent-changes)._
 
 ***
+
+## Modifier le message de son dernier commit
+
+Une faute de frappe impardonnable dans le message de votre dernier commit ?  Pas de souci :
+
+    git commit --amend -m "Nouveau message"
+
+Si vous souhaitez forcer la mise à jour sur la branche distance — attention c'est le mal, et ne pas faire sur un dépôt public ! —, il faut en plus exécuter la commande :
+
+	git push <remote> <branch> -f
+
+_[Source](https://stackoverflow.com/questions/179123/edit-an-incorrect-commit-message-in-git/179147#179147)_
 
 ## Antidater son dernier commit
 
