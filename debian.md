@@ -6,17 +6,17 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 * [Serveur](#serveur)
 * [Première connexion](#première-connexion)
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
-  * [Hostname](#hostname) 
+  * [Hostname](#hostname)
   * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
   * [Utilitaires](#utilitaires) : _[ssmtp](#ssmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron)_
-  * [Apache2 et PHP 5](#apache-2-et-php-5) (&rarr; [guide](https://github.com/nicolabricot/Memo/blob/master/apache.md))
+  * [Apache2 et PHP 5](#apache-2-et-php-5) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
   * [Git](#git)
   * [Munin](#munin): _[Munin node](#munin-node), [Munin server](#munin-server)_
   * [ownCloud](#owncloud)
 * [Mise en place de sauvegardes](#mise-en-place-de-sauvegardes)
   * [Sauvegardes incrémentales locales](#sauvegardes-incrémentales-locales)
   * [Sauvegardes externes](#sauvegardes-externes)
-  * [Vérification/récupération d'une sauvegarde](#vérificationrécupération-dune-sauvegarde) 
+  * [Vérification/récupération d'une sauvegarde](#vérificationrécupération-dune-sauvegarde)
 
 
 ***
@@ -47,12 +47,12 @@ On change les mots de passe !
 Puis on continue par configurer et sécuriser le service SSH (une fois en root) grâce au fichier `/etc/ssh/sshd_config` :
 
 	Port XYZ
-	
+
 	LoginGraceTime 120
 	PermitRootLogin no
 	StrictModes yes
 	AllowUsers username
-	
+
 	X11Forwarding no
 
 On supprime ensuite les clefs SSH par défault :
@@ -102,7 +102,7 @@ On va modifier le fichier `/etc/hosts` pour y ajouter notre nom de domaine compl
 
 On peut vérifier que c'est correct avec `hostname` puis `hostname -f`.
 
-_Si l'on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il faudrait modifier le fichier `/etc/network/interfaces`, voir [Attribution d'une IP fixe](https://github.com/nicolabricot/Memo/blob/master/raspberrypi.md#attribution-ip-fixe)._
+_Si l'on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il faudrait modifier le fichier `/etc/network/interfaces`, voir [Attribution d'une IP fixe](https://github.com/Devenet/Memo/blob/master/raspberrypi.md#attribution-ip-fixe)._
 
 ### IP externe dynamique
 
@@ -134,12 +134,12 @@ On peut maintenant modifier le fichier de configuration :
 et on va changer et ajouter certains paramètres :
 
 	use=web, web=checkip.dyndns.com, web-skip='IP Address'
-	
+
 	server=www.ovh.com
 	ssl=yes
 
 On redémarre le service avec `service ddclient restart`.
-  
+
 Pour vérifier que la mise à jour s'est bien effectuée, on peut visualiser le fichier `/var/cache/ddclient/ddclient.cache` et s'assurer que notre domaine pointe bien vers notre dernière IP.
 
 ## SSH
@@ -158,7 +158,7 @@ Pour cela, il suffit d'ajouter le fichier `/etc/ssh/sshrc` et d'y ajouter les ac
 	if [ -z ${REVERSE} ]
 		then REVERSE="unknow"
 	fi
-	
+
 	echo "$USER connected on `hostname -f` from $IP ($REVERSE)" | mail -s "SSH connection" you@domain.tld
 	) &
 
@@ -179,7 +179,7 @@ Pour personnaliser ce message, il suffit de modifier (ou créer s'il n'existe pa
 
 ### ssmtp
 
-Pour envoyer des emails, on installe : 
+Pour envoyer des emails, on installe :
 
 	apt-get install mailutils ssmtp
 
@@ -190,7 +190,7 @@ On peut ensuite configurer ssmtp via le fichier `/etc/ssmtp/ssmtp.conf`. Ici on 
 	rewriteDomain=domain.tld
 	hostname=name.domain.tld
 	FromLineOverride=YES
-	
+
 	UseSTARTTLS=YES
 	AuthUser=server@domain.tld
 	AuthPass=password
@@ -210,14 +210,14 @@ J'ai choisi que la boîte email du serveur ne servirait qu'à envoyer des emails
 	Hello
 
 	This is an unmonitored mailbox.
-	
+
 	We are sorry but the server is too busy at the moment to respond to your request.
 	Anyway he can neither speak (yes it is a he!) nor respond to messages.
-	
+
 	Please forward your message to a valid e-mail address, such as you@domain.tld.
-	
+
 	Have a nice day!
-	
+
 	--
 	The busy mailserver
 
@@ -234,13 +234,13 @@ Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2
 	bantime  = 3600
 	findtime = 1800
 	maxretry = 3
-	
+
 	destemail = you@domain.tld
 	mta = mail
 	action = %(action_mwl)s
 
 Ensuite, activer ou modifier les jails selon vos préférences. D'une manière générale n'hésitez pas à abaisser le nombre d'essais avant un bannissement.  
-Pour SSH, n'oubliez pas d'ajouter le nouveau port `port = ssh,XYZ`. 
+Pour SSH, n'oubliez pas d'ajouter le nouveau port `port = ssh,XYZ`.
 
 On relance pour prendre en compte les modifications :
 
@@ -284,7 +284,7 @@ That's it.
 
 ## Apache 2 et PHP 5
 
-Reportez-vous au document [Installation et configuration d'Apache 2 et PHP 5](https://github.com/nicolabricot/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
+Reportez-vous au document [Installation et configuration d'Apache 2 et PHP 5](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
 
 ## Git
 
@@ -296,7 +296,7 @@ Sauf exception, les dépôts git seront clonés dans `/data/git`, et on fera des
 
 	ln -s /data/git/moodpicker /data/www/vhost/moods
 
-permet de faire une lien depuis la source `moodpicker` réelle vers le lien virtuel `moods`. 
+permet de faire une lien depuis la source `moodpicker` réelle vers le lien virtuel `moods`.
 
 
 Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne soit pas accessible en ajoutant dans `/etc/apache2/conf.d/security` les directives suivantes, si ce n'est pas déjà fait :
@@ -304,7 +304,7 @@ Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne s
 	<DirectoryMatch "/\.git">
 		Deny from all
 		Satisfy all
-	</DirectoryMatch>	
+	</DirectoryMatch>
 
 
 ## Munin
@@ -329,7 +329,7 @@ Il faut regarder du côté de `/etc/munin/munin-node.conf`. On vérifie qu'on s'
 Pour le cas d'un nœud de notre réseau, il faudra insérer l'IP du serveur :
 
 	allow ^172\.16\.0\.42$
-	
+
 _Si, malheureusement, le serveur (qui héberge Munin serveur) a une adresse IP dynamique, il faudra ruser en autorisant n'importe quelle IP avec :_
 
 	allow ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
@@ -352,7 +352,7 @@ La configuration se fait dans `/etc/munin/munin.conf` :
 
 	htmldir /data/www/munin
 	contact.you.command mail -s "[Munin] Alert on ${var:host}" you@domain.tld
-	
+
 	[server.domain.tld]
     	address 127.0.0.1
     	use_node_name yes
@@ -365,7 +365,7 @@ La configuration se fait dans `/etc/munin/munin.conf` :
     	address server3.domain.tld
     	use_node_name yes
     	contacts you
-	
+
 On supprime le lien symbolique que Munin a ajouté dans `/etc/apache2/conf.d` qui a pour conséquence que chaque vhost Apache suivi de `/munin` affiche Munin :/
 
 	rm /etc/apache2/conf.d/munin
@@ -374,17 +374,17 @@ Et on crée un vhost spécifique pour Munin !
 
 #### Templates
 
-Le template par défaut étant assez… moche, on va le changer. On va utiliser [MunStrap](https://github.com/nicolabricot/MunStrap).
+Le template par défaut étant assez… moche, on va le changer. On va utiliser [MunStrap](https://github.com/Devenet/MunStrap).
 
 On commence par récupérer le dépôt Git :
 
-	git clone https://github.com/nicolabricot/MunStrap /data/git/munstrap
+	git clone https://github.com/Devenet/MunStrap /data/git/munstrap
 
 On archive les templates actuels et on fait un lien symbolique vers les nouveaux :
-	
+
 	mv /etc/munin/static /etc/munin/static.bak
 	mv /etc/munin/templates /etc/munin/templates.bak
-	
+
 	ln -s /data/git/munstrap/static /etc/munin/static
 	ln -s /data/git/munstrap/templates /etc/munin/templates
 
@@ -469,15 +469,15 @@ On va installer les fichiers web dans  `/data/www/owncloud` et les données prop
 On installe aussi le support de PHP GD :
 
 	apt-get install php5-gd
-	
+
 On créé ensuite un vhost dans Apache et on peut accéder à l'URL souhaitée pour la configuration.  
 
 Si vous ne disposez que de peu d'utilisateurs qui s'y connecteront (ou pour de petites machines), il suffit de choisir SQLite comme base de données. Sinon on prendra MySQL.
 
 Pour activer les tâches CRON nécessaires, on lancer l'éditeur CRON pour l'utilisateur `www-data` d'Apache :
-	
+
 	crontab -u www-data -e
-	
+
 Et on peut ajouter la ligne suivante :
 
 	*/15  *  *  *  * php -f /data/www/owncloud/cron.php
@@ -523,7 +523,7 @@ On peut maintenant modifier le fichier `/etc/rsnapshot.conf` avec notre configur
 	backup		/data/cloud/			server/
 	backup		/data/git/				server/
 	backup		/data/www/				server/
-	
+
 	backup		/etc/			server/
 
 	backup		/var/spool/cron/crontabs/		server/
@@ -536,11 +536,11 @@ On peut maintenant modifier le fichier `/etc/rsnapshot.conf` avec notre configur
 On peut ensuite tester notre fichier de configuration et simuler une première itération pour voir les actions qui seraient effectuées :
 
 	rsnapshot configtest
-	
+
 	rsnapshot -t hourly > /tmp/rsnap_test
 	cat /tmp/rsnap_test | less
 
-### Automatisation 
+### Automatisation
 
 Il suffit d'ajouter dans le fichier crontab les lignes suivantes (en fonction des intervalles de sauvegarde que vous avez choisi !)
 
@@ -572,17 +572,17 @@ On peut maintenant modifier la configuration du fichier `/etc/backup-manager.con
 
 	export BM_ARCHIVE_TTL="0"
 	export BM_TARBALL_DIRECTORIES="/data/backup"
-	
+
 	export BM_UPLOAD_METHOD="ftp"
 	export BM_UPLOAD_DESTINATION="/backup"
 	export BM_UPLOAD_FTP_USER="ftp-user"
 	export BM_UPLOAD_FTP_PASSWORD="ftp-password"
 	export BM_UPLOAD_FTP_HOSTS="ftp-host.domain.tld"
-	
+
 	export BM_BURNING_METHOD="none"
 
-	
-_Se reporter à la [documentation Dedibox](http://documentation.online.net/fr/serveur-dedie/sauvegarde/sauvegarde-dedibackup) pour les identifiants Dedibox à utiliser._ 
+
+_Se reporter à la [documentation Dedibox](http://documentation.online.net/fr/serveur-dedie/sauvegarde/sauvegarde-dedibackup) pour les identifiants Dedibox à utiliser._
 
 On peut ensuite lancer manuellement la copie pour s'assurer que tout se passe bien :
 
@@ -603,7 +603,7 @@ On peut maintenant automatiser ce backup.
 Comme pour les sauvegardes locales, on utilise les tâches CRON :
 
 	crontab -u root -e
-	
+
 	0 1 * * *       /usr/sbin/backup-manager -v | mail -s "[Backup] Synchronization performed" you@domain.tld
 
 Ici, les sauvergades seront envoyées sur le serveur FTP tous les jours à 1 heure du matin.
@@ -630,7 +630,7 @@ On s'y connecte et on liste les fichiers disponibles :
 	ftp> passive
 	ftp> ls backup
 
-Ensuite, il faut rapatrier l'archive qui nous intéresse localement avec 
+Ensuite, il faut rapatrier l'archive qui nous intéresse localement avec
 
 	ftp> cd backup
 	ftp> get nom_du_backup.date.tar.gz
@@ -641,4 +641,3 @@ On a maintenant le fichier en local, qu'on extrait et que l'on peut parcourir po
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faie qu'en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu'elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n'avez pas oublié des fichiers à sauvegarde ;-)
-

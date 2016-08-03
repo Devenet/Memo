@@ -83,7 +83,7 @@ pour ne pas être polluer des fichiers de la branche principale.
 
 Lorsque l'on clone un dépôt Git, tout l'historique est récupéré. Il n'est pas toujours nécessaire de les récupérer tous, il est possible en précisant la profondeur de ne récupérer qu'un certain nombres de commit depuis la dernière version :
 
-	git clone --depth=5 https://github.com/nicolabricot/Memo.git memo
+	git clone --depth=5 https://github.com/Devenet/Memo.git memo
 
 Cela permet de ne récupérer que les 5 derniers commits par exemple.
 
@@ -96,9 +96,9 @@ Ensuite, en passant par une branche orpheline on peut réécrire la branche mast
 	git checkout --orphan temp a089db6
 	git commit -m "Truncated history"
 	git rebase --onto temp a089db6 master
-	git branch -D temp 
+	git branch -D temp
 
-Pour que les modifications soient prises en compte sur le serveur distant de référence, il faut forcer la mise à jour avec 
+Pour que les modifications soient prises en compte sur le serveur distant de référence, il faut forcer la mise à jour avec
 
 	git push --force
 
@@ -124,7 +124,7 @@ _[Source](https://stackoverflow.com/questions/179123/edit-an-incorrect-commit-me
 
 Si pour d'obscures raisons vous avez besoin d'antidater votre dernier commit, voici la méthode.
 
-On commence par définir la date souhaitée en respectant le format 
+On commence par définir la date souhaitée en respectant le format
 
 	Tue, 16 Dec 2014 23:27:42 +0100
 
@@ -134,7 +134,7 @@ On ouvre ensuite une console en se placant dans le répertoire correspondant au 
 	GIT_COMMITTER_DATE='Tue, 16 Dec 2014 23:27:42 +0100'
 	git commit —amend --date "Tue, 16 Dec 2014 23:27:42 +0100"
 
-Il est possible qu'il soit nécessaire, en fonction de votre environnement, de remplacer les deux premières instructions par 
+Il est possible qu'il soit nécessaire, en fonction de votre environnement, de remplacer les deux premières instructions par
 
 	export GIT_AUTHOR_DATE='Tue, 16 Dec 2014 23:27:42 +0100'
 	export GIT_COMMITTER_DATE='Tue, 16 Dec 2014 23:27:42 +0100'

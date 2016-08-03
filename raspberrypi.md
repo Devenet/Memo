@@ -32,17 +32,17 @@ On télécharge d'abord la dernière version de Raspbian, par exemple depuis le 
 Ensuite, dans un terminal après avoir obtenu les super-pouvoirs (`sudo su`), on récupère le point de montage de notre carte SD :
 
 	diskutil list
-	
+
 On peut ainsi trouver que la carte est montée sur `/dev/disk1` (dans mon cas).
 
 Ensuite, on démonte la carte avec :
 
 	diskutil unmountDisk /dev/disk2
-	
+
 Et on peut enfin graver l'image avec :
 
 	dd bs=1m if=/Users/You/Downloads/raspbian.img of=/dev/disk2
-	
+
 Une fois l'opération terminée, on est prêt pour la suite.
 
 ***
@@ -54,20 +54,20 @@ Penser à brancher un clavier USB ainsi qu'avoir un écran (ou une TV) avec un p
 On tombe sur un écran « Setup Options ». On va d'abord étendre la partition sur toute la carte SD :
 
 	1 Expand Filesystem > Enter
-	
+
 Le mot de passe pour l'utilisateur `pi` est par défaut `raspberry`. On pourrait le modifier sur cet écran, mais pour des raisons de sécurité, comme on va le supprimer par la suite, on peut se passer de cette étape.
 
 On vérifie par contre que le RBPi boote bien “from Scratch” :
 
 	3 Enable Boot to Desktop/Scratch > Enter
 	Console Text console > Enter
-	
+
 Pour l'internationalisation, on va laisser l'anglais comme langue du système, mais on va changer la configuration du clavier et la zone de temps (après chaque modification, on revient sur l'écran d'accueil) :
 
 	4 Internationalisation Options > Enter
 	I2 Change Timezone > Enter
 	Europe -> Paris
-	
+
 	4 Internationalisation Options > Enter
 	I3 Change Keyboard layout > Enter
 	Genereic 104-key PC > Enter
@@ -79,11 +79,11 @@ Grâce aux options avancées, on va pouvoir entre autre régler la taille de la 
 
 	8 Advanced Options > Enter
 	A2 Hostname > Enter
-	
+
 	8 Advanced Options > Enter
 	A3 Memory Split > Enter
 	16 > Enter
-	
+
 	8 Advanced Options > Enter
 	A4 SSH > Enter
 	Enable > Enter
@@ -134,7 +134,7 @@ Vous pouvez aussi mettre votre RBPi en DMZ si vous souhaitez que toutes les requ
 
 Le package `sudo` est installé par défaut. Pour des raisons de sécurité, on le supprimer avec
 
-	apt-get --purge remove sudo 
+	apt-get --purge remove sudo
 
 Pour effectuer des commandes nécessitant les super-pouvoirs on passera en `root` avec la commande `su` depuis son compte local.
 
@@ -159,10 +159,10 @@ Sur Raspbian, l'utilisateur `pi` a été créé. Comme on a créé notre propre 
 
 Dans la configuration par défaut, SSH est configuré sur le port 22, n'importe quel utilisateur (dont `root` !) peut s'y connecter.
 
-Se reporter à la partie SSH du paragraphe « [Première connexion](https://github.com/nicolabricot/Memo/blob/master/debian.md#première-connexion) » du document sur [Debian](https://github.com/nicolabricot/Memo/blob/master/debian.md) pour changer ses paramètres.  
-Le paragraphe « [SSH](https://github.com/nicolabricot/Memo/blob/master/debian.md#ssh) » permet de recevoir un email à chaque connexion d'un utilisateur SSH.
+Se reporter à la partie SSH du paragraphe « [Première connexion](https://github.com/Devenet/Memo/blob/master/debian.md#première-connexion) » du document sur [Debian](https://github.com/Devenet/Memo/blob/master/debian.md) pour changer ses paramètres.  
+Le paragraphe « [SSH](https://github.com/Devenet/Memo/blob/master/debian.md#ssh) » permet de recevoir un email à chaque connexion d'un utilisateur SSH.
 
-On se connectera donc maintenant grâce à : 
+On se connectera donc maintenant grâce à :
 
 	ssh you@192.168.1.100 -p XXXXX
 
@@ -173,29 +173,29 @@ _Ces modifications sont vraiment importantes à faire, notamment si votre RBPi e
 On peut maintenant redémarrer le RBPi pour que les nouveaux paramètres soient pris en compte avec
 
 	reboot
-	
+
 # Configuration pour serveur
 
 Maintenant que notre RBPi a une IP fixe avec des comptes locaux à différents niveaux et un service SSH plus sécurisé, on va continuer notre configuration pour désinstaller les paquets initules pour notre serveur.
 
 ## Suppression des paquets
 
-On commencer par mettre à jour le dépôt des paquets avec 
+On commencer par mettre à jour le dépôt des paquets avec
 
 	apt-get update
-	
+
 On supprimer les paquets inutiles (ça en fait un paquet…) :
 
 	aptitude purge xserver-xorg xserver-xorg-core xserver-xorg-input-all xserver-xorg-input-evdev xserver-xorg-input-synaptics xserver-xorg-video-fbdev xserver-common xpdf xinit x11-common x11-utils x11-xkb-utils xarchiver screen pcmanfm penguinspuzzle lxde-common lxappearance lxde-icon-theme lxinput lxmenu-data lxpanel lxpolkit lxrandr lxsession lxsession-edit lxshortcut lxtask lxterminal leafpad dillo galculator gnome-icon-theme gnome-themes-standard gnome-themes-standard-data gpicview hicolor-icon-theme
 	aptitude purge ~c
-		
-## Mises à jour	
+
+## Mises à jour
 
 On peut maintenant lancer les mises à jour (à faire régulièrement) :
 
 	apt-get update && apt-get upgrade -y
 
-Si vous souhaitez mettre à jour votre distribution pour la version suppérieure, il faut en plus faire 
+Si vous souhaitez mettre à jour votre distribution pour la version suppérieure, il faut en plus faire
 
 	apt-get dist-upgrade
 
@@ -203,7 +203,7 @@ Si vous souhaitez mettre à jour votre distribution pour la version suppérieure
 
 Pour mettre à jour automatiquement le firmware du RBPi, on va installer le paquet `rpi-update` (s'il n'a pas déjà été installé) :
 
-	apt-get install rpi-update 
+	apt-get install rpi-update
 
 Ainsi, il suffira de lancer la commande `rpi-update` pour mettre à jour le firmware avec la dernière version disponible (nécessite un redémarrage pour la prise en compte).
 
@@ -214,7 +214,7 @@ Pour réveiller d'autres serveurs ou PC depuis votre RBPi grâce au WoL, je vous
 Il faut ensuite créer le fichier `etc/ethers` dans lequel vous mettez l'adresse MAC associée à un nom
 
 	00:00:00:00:00:00	gentil_nom
-	
+
 Pour réveiller un ordinateur, il suffit de faire :
 
 	etherwake gentil_nom
@@ -223,32 +223,31 @@ Pour réveiller un ordinateur, il suffit de faire :
 
 # Installation de services
 
-Pour stocker les données, je vous conseille de créer le répertoire racine `data` pour les y stocker 
+Pour stocker les données, je vous conseille de créer le répertoire racine `data` pour les y stocker
 
 	mkdir /data
-	
+
 Si vous avez une clef USB ou disque dur (à ne pas garder au format NTFS pour des raisons de performances) qui y est monté, placer y plutôt les données dessus pour éviter toute perte de données si le RBPi crachait pour une raison inconnue…
 
-Pour la suite, il suffit de vous reporter au document [debian.md](https://github.com/nicolabricot/Memo/blob/master/debian.md) pour installer et configurer les différents services que vous souhaitez pour votre serveur RBPi :-)
+Pour la suite, il suffit de vous reporter au document [debian.md](https://github.com/Devenet/Memo/blob/master/debian.md) pour installer et configurer les différents services que vous souhaitez pour votre serveur RBPi :-)
 
 ## Plugins Munin
 
 Une fois le nœud Munin installé, il existe des plugins propres pour les Raspberry Pi, dont un intéressant : celui de la température du CPU.  
 Pour cela, on récupère le script (basé sur [pisense](https://github.com/perception101/pisense)) qu'on enregistre et qu'on rend exécutable :
 
-	wget https://raw.githubusercontent.com/nicolabricot/Memo/master/ressources/munin_pisense -O /usr/share/munin/plugins/pisense_
+	wget https://raw.githubusercontent.com/Devenet/Memo/master/ressources/munin_pisense -O /usr/share/munin/plugins/pisense_
  	chmod +x /usr/share/munin/plugins/pisense_
 
 On peut ensuite l'ajouter dans le nœud Munin :
 
 	ln -s /usr/share/munin/plugins/pisense_ /etc/munin/plugins/pisense_temp
 
-en présicant dans `/etc/munin/plugin-conf.d/munin-node` 
+en présicant dans `/etc/munin/plugin-conf.d/munin-node`
 
 	[pisense_*]
-	user_root 
+	user_root
 
 On n'oublie pas de redémarrer les services
 
 	service munin-node restart
-
