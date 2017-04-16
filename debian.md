@@ -28,8 +28,8 @@ La première chose à faire est de choisir la distribution ; on prendra du Debia
 Pour le partitionnement, j'ai fait le choix suivant :
 
 * __Boot__ : 200 Mo
-* __Swap__ : 2048 Mo (~ RAM)
-* __/__ : 51200 Mo (~ 50 Go pour le système)
+* __Swap__ : 4096 Mo (~ RAM)
+* __/__ : 60000 Mo (~ 60 Go pour le système)
 * __/data__ : ce qui reste
 
 On choisit ensuite le nom de la machine, les mots de passe (que l'on changera à notre première connexion !), et on attend que les opérations soient terminées pour la suite.
