@@ -236,6 +236,9 @@ Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2
 	maxretry = 3
 
 	destemail = you@domain.tld
+	sendername = Fail2Ban (Server)
+	sender = fail2ban@server.domain.tld
+	
 	mta = mail
 	action = %(action_mwl)s
 
