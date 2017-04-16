@@ -8,7 +8,7 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
   * [Hostname](#hostname)
   * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
-  * [Utilitaires](#utilitaires) : _[ssmtp](#ssmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron)_
+  * [Utilitaires](#utilitaires) : _[ssmtp](#ssmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron)_, [unattended-upgrades](#unattended-upgrades)
   * [Apache2 et PHP 5](#apache-2-et-php-5) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
   * [Git](#git)
   * [Munin](#munin): _[Munin node](#munin-node), [Munin server](#munin-server)_
@@ -282,6 +282,19 @@ On configure le deamon grâce au fichier `/etc/apticron/apticron.conf` :
 	EMAIL="you@domain.tld"
 	CUSTOM_FROM="server@domain.tld"
 
+### unattended-upgrades
+
+Pour que les mises à jour critiques soient automatiquement faites (voir [cet article](http://www.tecmint.com/auto-install-security-updates-on-debian-and-ubuntu/)), on installe :
+
+	apt-get install unattended-upgrades apt-listchanges
+
+On modifie le fichier `/etc/apt/apt.conf.d/50unattended-upgrades` de configuration :
+
+	Unattended-Upgrade::Mail "dude@domain.tld";
+
+Et lance la configuration avec 
+
+	dpkg-reconfigure -plow unattended-upgrades
 
 That's it.
 
