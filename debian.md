@@ -211,15 +211,15 @@ J'ai choisi que la boîte email du serveur ne servirait qu'à envoyer des emails
 
 	This is an unmonitored mailbox.
 
-	We are sorry but the server is too busy at the moment to respond to your request.
-	Anyway he can neither speak (yes it is a he!) nor respond to messages.
+	We are sorry but the server is unable to respond to your request.
+	Anyway he can neither speak nor respond to messages.
 
 	Please forward your message to a valid e-mail address, such as you@domain.tld.
 
 	Have a nice day!
 
 	--
-	The busy mailserver
+	Server name
 
 
 ### fail2ban
