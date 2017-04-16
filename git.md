@@ -1,6 +1,6 @@
 # Astuces Git
 
-* [Ajouter ses clefs de connexion Git SSH](#ajout-ses-clefs-de-connexion-git-ssh)
+* [Ajouter ses clefs de connexion Git SSH](#ajouter-ses-clefs-de-connexion-git-ssh)
 * [Faire un remisage](#faire-un-remisage)
 * [Récupérer son remisage](#récupérer-son-remisage)
 * [Créer une branche vide](#créer-une-branche-vide)
