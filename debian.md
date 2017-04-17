@@ -5,6 +5,9 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 
 * [Serveur](#serveur)
 * [Première connexion](#première-connexion)
+  * [Mots de passe](#mots-de-passe)
+  * [Service SSH](#servcie-ssh)
+  * [Terminal](#terminal)
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
   * [Hostname](#hostname)
   * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
@@ -40,9 +43,13 @@ _On peut en profiter pour activer le backup FTP que l'on configurera plus tard._
 
 Une fois que le serveur est prêt, on va pouvoir s'y connecter en SSH, sur le port 22.  
 
+## Mots de passe
+
 On change les mots de passe !
 
 	passwd username
+
+## Service SSH
 
 Puis on continue par configurer et sécuriser le service SSH (une fois en root) grâce au fichier `/etc/ssh/sshd_config` :
 
@@ -68,6 +75,18 @@ Pour que les paramètres soient pris en compte :
 	service ssh restart
 
 On peut se déconnecter pour se reconnecter avec les nouveaux paramètres, et on est prêt pour la suite.
+
+## Terminal
+
+On peut ajouter dans le fichier `~/.bashrc` de l'utilisateur les alias suivants pour les commandes usuelles :
+
+	alias ls='ls $LS_OPTIONS --color=auto'
+	alias ll='ls -al $LS_OPTIONS --color=auto'
+	
+	alias upd='apt-get update'
+	alias upg='apt-get upgrade'
+
+Il faudra se reconnecter pour que les modifications soient prises en compte.
 
 ***
 
