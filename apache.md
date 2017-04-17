@@ -2,13 +2,12 @@
 
 Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir plusieurs sites web.
 
-__La version 2.4 d'Apache est sortie ; ce guide n'a pas encore été mis à jour !__
-
 * [Installation](#installation)
 * [Configuration](#configuration)
 	* [Sécurisation](#sécurisation)
 	* [Format des logs](#format-des-logs)
 	* [Support des fichiers XML](#support-des-fichiers-xml)
+	* [Images favicon](#images-favicon)
 	* [Modules](#modules)
 	* [Envoi d'e-mails](#envoi-de-mails)
 * [Virual hosts](#virutal-hosts)
@@ -31,14 +30,14 @@ __La version 2.4 d'Apache est sortie ; ce guide n'a pas encore été mis à jour
 Il suffit d'installer les paquages suivants :
 
 
-	apt-get install apache2 php5 php5-sqlite memcached php5-memchached php-apc
+	apt-get install apache2 php5 php5-sqlite memcached php-apc php5-memcached
 
 
 ## Configuration
 
 ### Sécurisation
 
-Dans le fichier `/etc/apache2/conf.d/security`, on vérifie que les directives suivantes sont bien configurées :
+Dans le fichier `/etc/apache2/conf-available/security.conf`, on vérifie que les directives suivantes sont bien configurées :
 
 	ServerTokens Prod
 	ServerSignature Off
@@ -56,13 +55,20 @@ On décommente (début du fichier normalement) et ajoute le paramétrage pour d�
 #### Git et SVN
 
 S'il vous arrive de cloner un dépôt et de l'utiliser, il faut veuiller à ce que les répertoires `.git` ne soient pas accessibles.  
-Pour cela, on modifie le fichier `/etc/apache2/conf.d/security`en décommantant la partie `svn` et en ajoutant une directive pour la partie `git` :
+Pour cela, on modifie le fichier `/etc/apache2/conf-available/security.conf`en décommantant la partie `svn` et en ajoutant une directive pour la partie `git` :
 
 	<DirectoryMatch "/\.svn">
 	       Deny from all
 	       Satisfy all
 	</DirectoryMatch>
 	<DirectoryMatch "/\.git">
+	       Deny from all
+	       Satisfy all
+	</DirectoryMatch>
+
+Si vous stockez des infos SSH de déploiement dans `/var/www/.ssh` par exemple, il faut aussi ajouter :
+
+	<DirectoryMatch "/\.ssh">
 	       Deny from all
 	       Satisfy all
 	</DirectoryMatch>
@@ -75,9 +81,25 @@ Comme on va utiliser plusieurs vhosts pour nos sites web, et pour un meilleur af
 
 ### Support des fichiers RSS
 
-Pour que les fichiers RSS soient automatiquement reconnus comme des fichiers XML, on crée le fichier `/etc/apache2/conf.d/xml-rss-support` dans lequel on inscrit :
+Pour que les fichiers RSS soient automatiquement reconnus comme des fichiers XML, on crée le fichier `/etc/apache2/conf-available/xml-rss-support.conf` dans lequel on inscrit :
 
 	AddType application/xml .xml .rss
+
+On active la configuration avec :
+
+	a2enconf xml-rss-support.conf
+
+### Images favicon
+
+Comme les navigateurs essaient toujours d'accéder à `/favicon.ico` et si l'on veut éviter des logs d'erreur pour ça, on peut toujours autoriser l'accès à ce fichier. On crée le fichier `/etc/apache2/conf-available/favicon.conf` qui contient :
+
+	<Location /favicon.ico>
+	   Require all granted
+	</Location>
+
+On active la configuration avec :
+
+	a2enconf favicon.conf
 
 ### Modules
 
@@ -86,8 +108,6 @@ On va activer les modules suivants :
 	a2enmod rewrite
 	a2enmod headers
 	a2enmod deflate
-	a2enmod mem_cache
-
 
 On peut aussi en profiter pour modifier le paramètre `DirectoryIndex` (ordre de préférence des fichiers) dans le fichier `/etc/apache2/mods-available/dir.conf` :
 
@@ -117,7 +137,7 @@ Il faut aussi s'assurer que dans `/etc/apache2/ports.conf` on a bien la directiv
 
 On va modifier le vhost par défaut. Comme on écoute sur le port 80 quelque soit l'IP ou DNS demandée, il faut filtrer un peu et refuser de répondre aux requêtes non attendues.
 
-On désactive le vhost par défaut avec `a2endissite default` puis on modifier le fichier `/etc/apache2/sites-available/default`.  
+On désactive le vhost par défaut avec `a2endissite 000-default.conf` puis on modifie le fichier `/etc/apache2/sites-available/00_	default.conf`.  
 _Personnellement, pour mieux me répérer, je préfixe tous mes fichiers vhost de 2 chiffres, je modifierai donc `00_default` ou `xx_vhost`._
 
 	<VirtualHost _default_:80>
@@ -144,7 +164,7 @@ _Personnellement, pour mieux me répérer, je préfixe tous mes fichiers vhost d
 		CustomLog ${APACHE_LOG_DIR}/access.log vhost_combined
 	</VirtualHost>
 
-La particularité de ce vhost est qu'il redirige toute requête entrante vers un autre serveur (Google en l'occurence). Pour quelqu'un qui essayerait d'obtenir une réponse HTTP en tapant sur une IP ou un NDD que l'on a pas configuré, il est redirigé plutôt que d'obtenir des infos sur le serveur alors qu'il ne devrait pas se trouver là.
+La particularité de ce vhost est qu'il redirige toute requête entrante vers un autre serveur (example.net en l'occurence). Pour quelqu'un qui essayerait d'obtenir une réponse HTTP en tapant sur une IP ou un NDD que l'on a pas configuré, il est redirigé plutôt que d'obtenir des infos sur le serveur alors qu'il ne devrait pas se trouver là.
 
 _On voit qu'on a aussi ajouté le comportement par défaut pour un vhost SSL qui n'existe pas ; voir le parapgraphe sur l'activitation du SSL._
 
@@ -191,7 +211,7 @@ Une fois que les deux précédents vhosts sont configurés, on peut maintenant c
 
 ### Proxy vhost
 
-Apache permet de configurer un virtual host pour l'utiliser comme un peoxy et accéder à un élément de réseau interne qui n'est (directement) pas accessible depuis l'extérieur.  
+Apache permet de configurer un virtual host pour l'utiliser comme un proxy et accéder à un élément de réseau interne qui n'est (directement) pas accessible depuis l'extérieur.  
 Par exemple si l'on souhaite pouvoir accéder au site web hébergé sur `192.168.1.1` (l'administration de votre box par exemple) qui n'est pas accessible depuis Internet, on peut configuer un vhost pour qu'il fasse le relais.
 
 __Notez bien que cela peut faciliter le piratage de votre réseau, à faire en connaissance de cause !__
@@ -261,9 +281,9 @@ On suppose que l'on a déjà les certificats qui seront utilisés, hormis le cer
 Ce certificat est utilisé pour le vhost SSL par « défaut ».  
 Il suffit de taper la commande suivante et d'y entrer les informations nécessaires (dans mon cas, comme je souhaite donner le moins d'informations, je ne renseigne que les champs obligatoires) :
 
-	openssl req -x509  -newkey rsa:2048 -nodes -days 365 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem
+	openssl req -x509  -newkey rsa:4096 -nodes -days 3650 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem
 
-_On peut aussi changer la durée de la validité du certificat (`-days 365`) voire diminuer ou augmenter la taille du chiffrement de la clef (`rsa:2048`)._
+_On peut aussi changer la durée de la validité du certificat (`-days 3650`) voire diminuer ou augmenter la taille du chiffrement de la clef (`rsa:4096`)._
 
 Pour éviter que n'importe qui puisse aller voir nos clefs privées, on fait un `chmod 400 ssl-cert-*.key` sur chaque de nos clefs privées !  
 On peut aussi faire un `chown :ssl-cert ssl-cert-*.key` pour leur attribuer comme groupe « ssl-cert ».
@@ -280,7 +300,7 @@ On commence par activer le module SSL :
 Ensuite on s'assure qu'on écoute sur le port 443 pour les vhosts à vérifier dans le fichier `/etc/apache2/ports.conf` :
 
 	NameVirtualHost *:443
-    Listen 443
+	Listen 443
 
 ### Configuration des vhost SSL
 
@@ -318,7 +338,7 @@ Pour faciliter la navigation, on ajoute dans le vhost SSL générique un vhost s
 		CustomLog ${APACHE_LOG_DIR}/access.log vhost_combined
 	</VirtualHost>
 
-Vous pouvez regarder du côté de StartSSL, une autorité de certification gratuite.
+Vous pouvez regarder du côté de Let’s Encrypt, une autorité de certification gratuite.
 
 
 ## Application des paramètres
