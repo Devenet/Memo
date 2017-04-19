@@ -250,6 +250,10 @@ Voir la section [Authentification](#authentification) pour que tout le monde ne 
 
 ## Authentification
 
+Il faut activer le module suivant pour supporter l'authentification par groupes d'utilisateurs :
+
+	a2enmod authz_groupfile
+
 Dans la configuration du vhost précédent, on a inclus le fichier de configuration `auth_server.conf` (permet de l'inclure depuis plusieurs vhosts) :
 
 		AuthType Basic
