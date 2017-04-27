@@ -30,7 +30,7 @@ Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir
 Il suffit d'installer les paquages suivants :
 
 
-	apt-get install apache2 php5 php5-sqlite memcached php-apc php5-memcached
+	apt-get install apache2 php5 php5-sqlite memcached php-apc php5-memcached php5-gd php5-curl
 
 
 ## Configuration
