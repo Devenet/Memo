@@ -610,7 +610,7 @@ On peut maintenant modifier la configuration du fichier `/etc/backup-manager.con
 	export BM_TARBALL_DIRECTORIES="/data/backup"
 
 	export BM_UPLOAD_METHOD="ftp"
-	export BM_UPLOAD_DESTINATION="/backup"
+	export BM_UPLOAD_DESTINATION="/backups"
 	export BM_UPLOAD_FTP_USER="ftp-user"
 	export BM_UPLOAD_FTP_PASSWORD="ftp-password"
 	export BM_UPLOAD_FTP_HOSTS="ftp-host.domain.tld"
@@ -664,11 +664,11 @@ On s'y connecte et on liste les fichiers disponibles :
 	ftp -n ftp-host.domain.tld
 	ftp> user ftp-user ftp-password
 	ftp> passive
-	ftp> ls backup
+	ftp> ls backups
 
 Ensuite, il faut rapatrier l'archive qui nous intéresse localement avec
 
-	ftp> cd backup
+	ftp> cd backups
 	ftp> get nom_du_backup.date.tar.gz
 	ftp> exit
 
