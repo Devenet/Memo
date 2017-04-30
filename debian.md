@@ -101,13 +101,13 @@ Au niveau de l'arborescence, j'ai fait le choix suivant :
 
 	/data
 		/apache
-			/auth
+			/credentials
 			/conf
 		/cloud
 		/git
 			/some-repository
 		/www
-			/owncloud
+			/nextcloud
 			/some-vhost
 			/munin
 
