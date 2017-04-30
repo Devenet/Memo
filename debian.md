@@ -15,7 +15,7 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
   * [Apache2 et PHP 5](#apache-2-et-php-5) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
   * [Git](#git)
   * [Munin](#munin): _[Munin node](#munin-node), [Munin server](#munin-server)_
-  * [ownCloud](#owncloud)
+  * [Nextcloud](#nextcloud)
 * [Mise en place de sauvegardes](#mise-en-place-de-sauvegardes)
   * [Sauvegardes incrémentales locales](#sauvegardes-incrémentales-locales)
   * [Sauvegardes externes](#sauvegardes-externes)
@@ -491,15 +491,15 @@ Pour cela, il est nécessaire de modifier le fichier de configuration du serveur
 La dernière directive permet de changer l'ordre d'affichage (par défaut alphabétique).  
 En fonction des graphes globaux que vous souhaitez, n'hésitez pas à adapter la configuration.
 
-## ownCloud
+## Nextloud
 
-Je ne préfère pas installer ownCloud depuis le paquet Debian ; on va donc télécharger l'archive depuis le site.
+Je ne préfère pas installer Nextcloud depuis le paquet Debian ; on va donc télécharger l'archive depuis le site.
 
-On va installer les fichiers web dans  `/data/www/owncloud` et les données propres dans `/data/cloud`.
+On va installer les fichiers web dans  `/data/www/nextcloud` et les données propres dans `/data/cloud`.
 
 	cd /data/www
-	wget https://download.owncloud.org/community/owncloud-X.tar.bz2
-	tar -vxjf owncloud-X.tar.bz2
+	wget https://download.nextcloud.com/server/releases/nextcloud-XYZ.tar.bz2
+	tar -vxjf nextcloud-XYZ.tar.bz2
 
 On installe aussi le support de PHP GD :
 
@@ -515,9 +515,9 @@ Pour activer les tâches CRON nécessaires, on lancer l'éditeur CRON pour l'uti
 
 Et on peut ajouter la ligne suivante :
 
-	*/15  *  *  *  * php -f /data/www/owncloud/cron.php
+	*/15  *  *  *  * php -f /data/www/nextcloud/cron.php
 
-Après avoir configurer les utilisateurs et la configuration via l'application web, on va aller modifier le fichier `/data/www/owncloud/config/config.php` :
+Après avoir configurer les utilisateurs et la configuration via l'application web, on va aller modifier le fichier `/data/www/nextcloud/config/config.php` :
 
 	'asset-pipeline.enabled' => true,
 	'knowledgebaseenabled' => false,
