@@ -401,9 +401,10 @@ La configuration se fait dans `/etc/munin/munin.conf` :
     	use_node_name yes
     	contacts you
 
-On supprime le lien symbolique que Munin a ajouté dans `/etc/apache2/conf.d` qui a pour conséquence que chaque vhost Apache suivi de `/munin` affiche Munin :/
+On supprime le lien symbolique que Munin a ajouté dans `/etc/apache2/conf-enabled` et `/etc/apache2/conf-available` qui a pour conséquence que chaque vhost Apache suivi de `/munin` affiche Munin :/
 
-	rm /etc/apache2/conf.d/munin
+	rm /etc/apache2/conf-enabled/munin.conf
+	rm /etc/apache2/conf-available/munin.conf
 
 Et on crée un vhost spécifique pour Munin !
 
