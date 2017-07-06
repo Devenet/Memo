@@ -10,7 +10,7 @@ Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir
 	* [Images favicon](#images-favicon)
 	* [Modules](#modules)
 	* [Envoi d'e-mails](#envoi-de-mails)
-* [Virual hosts](#virutal-hosts)
+* [Virual hosts](#virtual-hosts)
 	* [Default vhost](#default-vhost)
 	* [Local vhost](#local-vhost)
 	* [Generic vhosts](#generic-vhosts)
@@ -126,8 +126,8 @@ Pour servir plusieurs sites web avec des noms de domaines différents, on va uti
 
 Il suffit de créer un fichier de configuration dans `/etc/apache2/sites-available` et de l'activer ou désactiver selon ses besoins.
 
-	a2ensite nom_vhost_file
-	a2dissite nom_vhost_file
+	a2ensite nom_vhost_file.conf
+	a2dissite nom_vhost_file.conf
 
 Il faut aussi s'assurer que dans `/etc/apache2/ports.conf` on a bien la directive :
 
