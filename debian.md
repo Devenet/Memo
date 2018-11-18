@@ -676,4 +676,4 @@ On a maintenant le fichier en local, qu'on extrait et que l'on peut parcourir po
 
 	tar -xvzf nom_du_backup.date.tar.gz
 
-Même si cette manipulation ne serait à faie qu'en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu'elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n'avez pas oublié des fichiers à sauvegarde ;-)
+Même si cette manipulation ne serait à faire qu'en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu'elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n'avez pas oublié des fichiers à sauvegarder ;-)
