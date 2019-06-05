@@ -48,8 +48,7 @@ On décommente (début du fichier normalement) et ajoute le paramétrage pour d�
 	<Directory />
 		Options -Indexes
 		AllowOverride None
-	#	Order Deny,Allow
-	#	Deny from all
+	#	Require all denied
 	</Directory>
 
 #### Git et SVN
@@ -58,19 +57,16 @@ S'il vous arrive de cloner un dépôt et de l'utiliser, il faut veuiller à ce q
 Pour cela, on modifie le fichier `/etc/apache2/conf-available/security.conf`en décommantant la partie `svn` et en ajoutant une directive pour la partie `git` :
 
 	<DirectoryMatch "/\.svn">
-	       Deny from all
-	       Satisfy all
+	       Require all denied
 	</DirectoryMatch>
 	<DirectoryMatch "/\.git">
-	       Deny from all
-	       Satisfy all
+	       Require all denied
 	</DirectoryMatch>
 
 Si vous stockez des infos SSH de déploiement dans `/var/www/.ssh` par exemple, il faut aussi ajouter :
 
 	<DirectoryMatch "/\.ssh">
-	       Deny from all
-	       Satisfy all
+	       Require all denied
 	</DirectoryMatch>
 
 ### Format des logs
