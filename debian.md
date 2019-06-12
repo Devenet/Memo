@@ -307,7 +307,11 @@ Pour que les mises à jour critiques soient automatiquement faites (voir [cet ar
 
 	apt-get install unattended-upgrades apt-listchanges
 
-On modifie le fichier `/etc/apt/apt.conf.d/50unattended-upgrades` de configuration :
+On modifie le fichier `/etc/apt/apt.conf.d/20auto-upgrades` de configuration en ajoutant :
+
+	APT::Periodic::AutocleanInterval "31";
+
+On modifie ensuite le fichier `/etc/apt/apt.conf.d/50unattended-upgrades` de configuration :
 
 	Unattended-Upgrade::Mail "dude@domain.tld";
 
