@@ -121,8 +121,8 @@ Ensuite on lui attribue une adresse IP fixe, qui va nous faciliter la tâche. On
 	iface eth0 inet static
 		address 192.168.1.100
 		netmask 255.255.255.0
-		network 192.168.1.0
-		broadcast 192.168.1.255
+		#network 192.168.1.0
+		#broadcast 192.168.1.255
 		gateway 192.168.1.1
 
 en adaptant selon la configuration de votre réseau.
