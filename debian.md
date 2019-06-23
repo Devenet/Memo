@@ -58,6 +58,8 @@ Puis on continue par configurer et sécuriser le service SSH (une fois en root) 
 	LoginGraceTime 120
 	PermitRootLogin no
 	StrictModes yes
+	MaxAuthTries 3
+	
 	AllowUsers username
 
 	X11Forwarding no
