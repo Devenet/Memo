@@ -7,8 +7,8 @@ Ce guide a été effectué et mis à jour pour une installation de Rapbian sur u
 * [Configuration initiale](#configuration-initiale)
 	* [Nom du serveur](#nom-du-serveur)
 	* [Attribution IP fixe](#attribution-ip-fixe)
-	* [Package sudo](#package-sudo)
 	* [Comptes utilisateurs](#comptes-utilisateurs)
+	* [Package sudo](#package-sudo)
 	* [Sécurisation de SSH](#sécurisation-de-ssh)
 	* [Prise en compte](#prise-en-compte)
 * [Configuration pour serveur](#configuration-pour-serveur)
@@ -140,15 +140,6 @@ en adaptant selon la configuration de votre réseau.
 On peut en profiter pour ouvrir les (présents et futurs) ports utilisés dans la page de configuration de votre box ou de votre routeur.  
 Vous pouvez aussi mettre votre RBPi en DMZ si vous souhaitez que toutes les requêtes provenant de l'extérieur lui soient soumises.
 
-## Package sudo
-
-Le package `sudo` est installé par défaut. Pour des raisons de sécurité, on le supprimer avec
-
-	apt-get --purge remove sudo
-
-Pour effectuer des commandes nécessitant les super-pouvoirs on passera en `root` avec la commande `su` depuis son compte local.
-
-
 ## Comptes utilisateurs
 
 On commence par modifier (ou attribuer) un mot de passe pour le compte `root` :
@@ -164,6 +155,14 @@ On se déloggue (`exit`) et on se reconnecte avec le compte utilisateur nouvelle
 Sur Raspbian, l'utilisateur `pi` a été créé. Comme on a créé notre propre compte et qu'on est loggué avec, on va pouvoir le supprimer (après être passé en `root`) :
 
 	deluser --remove-home pi
+
+## Package sudo
+
+Le package `sudo` est installé par défaut. Pour des raisons de sécurité, on le supprimer avec
+
+	apt-get --purge remove sudo
+
+Pour effectuer des commandes nécessitant les super-pouvoirs on passera en `root` avec la commande `su` depuis son compte local.
 
 ## Sécurisation de SSH
 
