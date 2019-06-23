@@ -51,42 +51,52 @@ Une fois l'opération terminée, on est prêt pour la suite.
 
 Penser à brancher un clavier USB ainsi qu'avoir un écran (ou une TV) avec un port HDMI.
 
-On tombe sur un écran « Setup Options ». On va d'abord étendre la partition sur toute la carte SD :
+Pour se connecter, le nom d’utilisateur est `pi` et le mot de passe par défaut est `raspberry`.  
+Attention, le clavier étant par défaut en Qwerty, il faut taper la lettre `q` pour faire un `a`.
 
-	1 Expand Filesystem > Enter
+On lance l'écran de configuration avec :
+
+	sudo su
+	raspi-config
+
+On va d'abord étendre la partition sur toute la carte SD :
+
+	Advenced Options
+	A1 Expand Filesystem > Enter
 
 Le mot de passe pour l'utilisateur `pi` est par défaut `raspberry`. On pourrait le modifier sur cet écran, mais pour des raisons de sécurité, comme on va le supprimer par la suite, on peut se passer de cette étape.
 
 On vérifie par contre que le RBPi boote bien “from Scratch” :
 
-	3 Enable Boot to Desktop/Scratch > Enter
-	Console Text console > Enter
+	Boot options
+	B1 Desktop / CLI > Enter
+	B1 Console (Text console, requiring user to login) > Enter
 
 Pour l'internationalisation, on va laisser l'anglais comme langue du système, mais on va changer la configuration du clavier et la zone de temps (après chaque modification, on revient sur l'écran d'accueil) :
 
-	4 Internationalisation Options > Enter
+	Localisation Options > Enter
 	I2 Change Timezone > Enter
 	Europe -> Paris
 
-	4 Internationalisation Options > Enter
-	I3 Change Keyboard layout > Enter
+	Localisation Options > Enter
+	I3 Change Keyboard Layout > Enter
 	Genereic 104-key PC > Enter
-	France -> French -> Default -> No compose key -> Yes
+	Other -> French -> French -> Default -> No compose key -> Ok
 
 Si vous souhaitez overclocker votre RBPi, il suffit de suivre les insctructions de `7 Overclock`.
 
 Grâce aux options avancées, on va pouvoir entre autre régler la taille de la mémoire dédiée à la vidéo (pour un serveur, au plus petit), activer le SSH, …
 
-	8 Advanced Options > Enter
-	A2 Hostname > Enter
+	Network Options > Enter
+	N1 Hostname > Enter
 
-	8 Advanced Options > Enter
+	Advanced Options > Enter
 	A3 Memory Split > Enter
 	16 > Enter
 
-	8 Advanced Options > Enter
-	A4 SSH > Enter
-	Enable > Enter
+	Interfacing Options > Enter
+	P2 SSH > Enter
+	Enable > Yes
 
 En cliquant sur `Finish` on arrive sur le bash, et l'on peut redémarrer le RBPi avec `sudo reboot`.
 
