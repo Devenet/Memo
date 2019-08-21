@@ -252,8 +252,8 @@ Notre serveur étant connecté au web, on installe fail2ban qui permet de bannir
 Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2ban/jail.local` et c'est ce dernier qu'on va modifier :
 
 	ignoreip = 127.0.0.1/8
-	bantime  = 3600
-	findtime = 1800
+	bantime  = 7200
+	findtime = 3600
 	maxretry = 3
 
 	destemail = you@domain.tld
