@@ -391,6 +391,7 @@ La documentation disponible sur le site francophone d'Ubuntu est assez complète
 
 La configuration se fait dans `/etc/munin/munin.conf` :
 
+	dbdir /data/db/munin
 	htmldir /data/www/munin
 	contact.you.command mail -s "[Munin] Alert on ${var:host}" you@domain.tld
 
@@ -422,13 +423,11 @@ On commence par récupérer le dépôt Git :
 
 	git clone https://github.com/Devenet/MunStrap /data/git/munstrap
 
-On archive les templates actuels et on fait un lien symbolique vers les nouveaux :
+Puis on change les chemins dans le fichier de configuration de Munin `/etc/munin/munin.conf` :
 
-	mv /etc/munin/static /etc/munin/static.bak
-	mv /etc/munin/templates /etc/munin/templates.bak
+	tmpldir /data/git/munstrap/templates
+	staticdir /data/git/munstrap/static
 
-	ln -s /data/git/munstrap/static /etc/munin/static
-	ln -s /data/git/munstrap/templates /etc/munin/templates
 
 Vous verrez le changement lors de la prochaine itération de Munin.
 
