@@ -105,6 +105,8 @@ Au niveau de l'arborescence, j'ai fait le choix suivant :
 		/apache
 			/credentials
 			/conf
+		/db
+			/munin
 		/cloud
 		/git
 			/some-repository
@@ -560,14 +562,20 @@ On peut maintenant modifier le fichier `/etc/rsnapshot.conf` avec notre configur
 	retain		weekly		4
 
 	# Server
-	backup		/data/apache/			server/
-	backup		/data/cloud/			server/
-	backup		/data/git/				server/
-	backup		/data/www/				server/
+	backup          /home/                          server/
+	backup          /root/                          server/
+	backup          /etc/                           server/
+	backup          /usr/local/                     server/
+	
+	backup          /data/apache/                   server/
+	backup          /data/db/                       server/
+	backup          /data/cloud/                    server/
+	backup          /data/git/                      server/
+	backup          /data/www/                      server/
+	
+	backup          /var/www/                       server/
+	backup          /var/spool/cron/crontabs/       server/
 
-	backup		/etc/			server/
-
-	backup		/var/spool/cron/crontabs/		server/
 
 * Les intervalles sont à choisir en fonction de ce que vous voulez et de la sécurité des sauvegardes vous souhaitez.
 * Les répertoires à sauvegarder aussi ; dans mon cas je sauvegarde les données présentes sur `/data` et les fichiers de configuration intéressants de `/etc`.
