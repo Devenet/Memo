@@ -1,4 +1,4 @@
-# Installation et configuration d'Apache 2 et PHP 5
+# Installation et configuration d'Apache 2 et PHP 7
 
 Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir plusieurs sites web.
 
@@ -30,7 +30,7 @@ Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir
 Il suffit d'installer les paquages suivants :
 
 
-	apt-get install apache2 php5 php5-sqlite memcached php-apc php5-memcached php5-gd php5-curl
+	apt-get install apache2 php7.0 php7.0-mbstring php7.0-xml php7.0-sqlite memcached php7.0-memcached php7.0-curl php7.0-zip
 
 
 ## Configuration
@@ -107,7 +107,7 @@ On va activer les modules suivants :
 
 On peut aussi en profiter pour modifier le paramètre `DirectoryIndex` (ordre de préférence des fichiers) dans le fichier `/etc/apache2/mods-available/dir.conf` :
 
-	 DirectoryIndex index.php index.html index.htm
+	 DirectoryIndex index.html index.htm index.php
 
 
 ### Envoi d'e-mails
@@ -139,7 +139,6 @@ _Personnellement, pour mieux me répérer, je préfixe tous mes fichiers vhost d
 	<VirtualHost _default_:80>
 		ServerName default.local
 		DocumentRoot /dev/null
-		Redirect / http://example.net
 
 		ErrorLog ${APACHE_LOG_DIR}/error.log
 		LogLevel warn
@@ -149,7 +148,6 @@ _Personnellement, pour mieux me répérer, je préfixe tous mes fichiers vhost d
 	<VirtualHost _default_:443>
 		ServerName default.local
 		DocumentRoot /dev/null
-		Redirect / http://example.net
 
 		SSLEngine on
 		SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -171,8 +169,8 @@ On va ensuite créer le vhost « localhost » pour qu'Apache accepte les requêt
 	<VirtualHost *:80>
 		ServerName localhost
 		ServerAlias 127.0.0.1
-
 		ServerAdmin you@domain.tld
+		
 		DocumentRoot /var/www
 
 		ErrorLog ${APACHE_LOG_DIR}/error.log
@@ -187,10 +185,9 @@ Une fois que les deux précédents vhosts sont configurés, on peut maintenant c
 	<VirtualHost *:80>
 		ServerName domain.tld
 		ServerAlias www.domain.tld
-
 		ServerAdmin you@domain.tld
+		
 		DocumentRoot /data/www/domain.tld
-
 		<Directory /data/www/domain.tld>
 			ErrorDocument 404 /404.html
 		</Directory>
@@ -222,11 +219,11 @@ Puis on configure le vhost :
 	<VirtualHost *:80>
 		ServerName something.domain.tld
 
-		ProxyPass               /       http://192.168.1.1/
-		ProxyPassReverse        /       http://192.168.1.1/
 		ProxyRequests           Off
 		ProxyPreserveHost       Off
-		SSLProxyEngine          On
+		
+		ProxyPass               /       http://192.168.1.1/
+		ProxyPassReverse        /       http://192.168.1.1/
 		<Proxy *>
 				Order Deny,Allow
 				Allow from all
@@ -315,10 +312,9 @@ Pour faciliter la navigation, on ajoute dans le vhost SSL générique un vhost s
 
 	<VirtualHost *:443>
 		ServerName sub.domain.tld
-
 		ServerAdmin you@domain.tld
+		
 		DocumentRoot /data/www/sub.domain.tld
-
 		<Directory /data/www/sub.domain.tld>
 			ErrorDocument 403 /403.html
 			ErrorDocument 404 /404.html
