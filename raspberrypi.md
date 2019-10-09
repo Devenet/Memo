@@ -162,7 +162,7 @@ Le package `sudo` est installé par défaut. Pour des raisons de sécurité, on 
 
 	apt-get --purge remove sudo
 
-Pour effectuer des commandes nécessitant les super-pouvoirs on passera en `root` avec la commande `su` depuis son compte local.
+Pour effectuer des commandes nécessitant les super-pouvoirs on passera en `root` avec la commande `su -` depuis son compte local.
 
 ## Sécurisation de SSH
 
