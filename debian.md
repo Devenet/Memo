@@ -200,23 +200,29 @@ Pour personnaliser ce message, il suffit de modifier (ou créer s'il n'existe pa
 
 ## Utilitaires
 
-### ssmtp
+### smsmtp
 
 Pour envoyer des emails, on installe :
 
-	apt-get install mailutils ssmtp
+	apt-get install mailutils msmtp msmtp-mta
 
-On peut ensuite configurer ssmtp via le fichier `/etc/ssmtp/ssmtp.conf`. Ici on suppose que l'on a un compte Gmail dédié pour le serveur ; à adapter selon votre fournisseur.
+On peut ensuite configurer msmtp via le fichier `/etc/msmtprc` à créer. Ici on suppose que l'on a un compte Gmail dédié pour le serveur ; à adapter selon votre fournisseur.
 
-	root=you@domain.tld
-	mailhub=smtp.gmail.com:587
-	rewriteDomain=domain.tld
-	hostname=name.domain.tld
-	FromLineOverride=YES
-
-	UseSTARTTLS=YES
-	AuthUser=server@domain.tld
-	AuthPass=password
+	defaults
+	logfile /var/log/msmtp.log
+	aliases /etc/aliases
+	auth on
+	tls on
+	
+	account server@gmail.com
+	host smtp.gmail.com
+	port 587
+	tls_starttls on
+	user server@gmail.com
+	password <super_password_42>
+	from server@gmail.com
+	
+	account default : server@gmail.com
 
 Pour vérifier que la configuration est bonne, il suffit de s'envoyer un email :
 
@@ -253,7 +259,7 @@ Notre serveur étant connecté au web, on installe fail2ban qui permet de bannir
 
 Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2ban/jail.local` et c'est ce dernier qu'on va modifier :
 
-	ignoreip = 127.0.0.1/8
+	ignoreip = 127.0.0.1/8 ::1
 	bantime  = 7200
 	findtime = 3600
 	maxretry = 3
