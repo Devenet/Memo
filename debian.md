@@ -11,7 +11,7 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
   * [Hostname](#hostname)
   * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
-  * [Utilitaires](#utilitaires) : _[ssmtp](#ssmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron), [unattended-upgrades](#unattended-upgrades)_
+  * [Utilitaires](#utilitaires) : _[msmtp](#msmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron), [unattended-upgrades](#unattended-upgrades)_
   * [Apache2 et PHP 5](#apache-2-et-php-5) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
   * [Git](#git)
   * [Munin](#munin): _[Munin node](#munin-node), [Munin server](#munin-server)_
@@ -200,7 +200,7 @@ Pour personnaliser ce message, il suffit de modifier (ou créer s'il n'existe pa
 
 ## Utilitaires
 
-### smsmtp
+### msmtp
 
 Pour envoyer des emails, on installe :
 
