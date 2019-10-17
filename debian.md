@@ -392,6 +392,7 @@ _Néanmoins, celle solution permet à n'importe qui connaissant votre IP de dema
 La documentation disponible sur le site francophone d'Ubuntu est assez complète : [doc.ubuntu-fr.org/munin](http://doc.ubuntu-fr.org/munin#munin-node_le_demon_sur_les_noeuds).
 
 	munin-node-configure --suggest --shell
+	munin-run processes --debug
 	…
 	service munin-node restart
 
