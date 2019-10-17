@@ -255,7 +255,7 @@ On peut ensuite l'ajouter dans le nœud Munin :
 en présicant dans `/etc/munin/plugin-conf.d/munin-node`
 
 	[pisense_*]
-	user_root
+	user root
 
 On n'oublie pas de redémarrer les services
 
