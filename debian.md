@@ -12,7 +12,7 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
   * [Hostname](#hostname)
   * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
   * [Utilitaires](#utilitaires) : _[msmtp](#msmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron), [unattended-upgrades](#unattended-upgrades)_
-  * [Apache2 et PHP 5](#apache-2-et-php-5) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
+  * [Apache2 et PHP 7](#apache-2-et-php-7) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
   * [Git](#git)
   * [Munin](#munin): _[Munin node](#munin-node), [Munin server](#munin-server)_
   * [Nextcloud](#nextcloud)
@@ -26,13 +26,13 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 
 # Serveur
 
-La première chose à faire est de choisir la distribution ; on prendra du Debian 7 64 bits.
+La première chose à faire est de choisir la distribution ; on prendra du Debian 64 bits.
 
 Pour le partitionnement, j'ai fait le choix suivant :
 
 * __Boot__ : 200 Mo
 * __Swap__ : 4096 Mo (~ RAM)
-* __/__ : 60000 Mo (~ 60 Go pour le système)
+* __/__ : 80000 Mo (~ 80 Go pour le système)
 * __/data__ : ce qui reste
 
 On choisit ensuite le nom de la machine, les mots de passe (que l'on changera à notre première connexion !), et on attend que les opérations soient terminées pour la suite.
@@ -103,11 +103,12 @@ Au niveau de l'arborescence, j'ai fait le choix suivant :
 
 	/data
 		/apache
-			/credentials
 			/conf
+			/credentials
+		/backup
+		/cloud
 		/db
 			/munin
-		/cloud
 		/git
 			/some-repository
 		/www
@@ -132,7 +133,7 @@ _Si l'on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il f
 Si votre serveur est hebergé par un professionnel ou que vous avez une IP fixe, il suffit de modifier vos entrées DNS pour que `name.domain.tld` pointe vers l'IP externe de votre serveur, et vous pouvez passer à la suite.  
 
 Dans le cas où l'on ne possède qu'une adresse IP dynamique, il va falloir ruser en mettant à jour notre enregistrement DNS à chaque fois que l'IP change.  
-On a différentes manières de le faire, dont utiliser un service externe : DynDNS (payant maintenant !), No-Ip (limité à 3 hosts pour le compte gratuit), DynHost d'OVH, ...  
+On a différentes manières de le faire, dont utiliser un service externe : DynDNS (payant maintenant !), No-Ip (limité à 3 hosts pour le compte gratuit), DynHost d'OVH, …  
 On va prendre l'exemple du service DynHost ; pour les autres services, il suffit d'adapter.
 
 On installe `ddclient` qui va permettre de mettre à jour automatiquement notre IP sur l'entrée DNS correspondante si elle a changé depuis la dernière fois :
@@ -163,7 +164,8 @@ et on va changer et ajouter certains paramètres :
 
 On redémarre le service avec `service ddclient restart`.
 
-Pour vérifier que la mise à jour s'est bien effectuée, on peut visualiser le fichier `/var/cache/ddclient/ddclient.cache` et s'assurer que notre domaine pointe bien vers notre dernière IP.
+Pour vérifier que la mise à jour s'est bien effectuée, on peut visualiser le fichier `/var/cache/ddclient/ddclient.cache` et s'assurer que notre domaine pointe bien vers notre dernière IP.  
+Sinon, on peut aussi lancer le service en mode debug avec `ddclient -daemon=0 -debug -verbose -noquiet`.
 
 ## SSH
 
@@ -331,9 +333,9 @@ Et lance la configuration avec
 
 That's it.
 
-## Apache 2 et PHP 5
+## Apache 2 et PHP 7
 
-Reportez-vous au document [Installation et configuration d'Apache 2 et PHP 5](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
+Reportez-vous au document [Installation et configuration d'Apache 2 et PHP 7](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
 
 ## Git
 
