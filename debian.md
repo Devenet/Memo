@@ -229,10 +229,17 @@ On peut ensuite configurer msmtp via le fichier `/etc/msmtprc` à créer. Ici on
 Pour vérifier que la configuration est bonne, il suffit de s'envoyer un email :
 
 	echo "Test OK" | mail -s "Hello world" you@domain.tld
+	# pour avoir plus d'information en cas d'erreur :
+	echo "Test ?" | msmtprc you@domain.tld
 
 Penser à modifier le fichier `/etc/passwd` pour mettre à jour le nom des utilisateurs avec quelque chose de plus friendly :
 
 	root:x:0:0:Server Name:/root:/bin/bash
+
+Et ajouter un alias dans `/root/.bashrc` pour forcer le nom de l'expéditeur :
+
+	alias mail='mail -a "From: Server <server@domain.tld>"'
+
 
 #### Réponse automatique
 
