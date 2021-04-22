@@ -649,6 +649,26 @@ On peut maintenant modifier la configuration du fichier `/etc/backup-manager.con
 
 _Se reporter à la [documentation Dedibox](http://documentation.online.net/fr/serveur-dedie/sauvegarde/sauvegarde-dedibackup) pour les identifiants Dedibox à utiliser._
 
+
+Si on veut sauvegarder sa base de données SQL (en local + export FTP) :
+
+    # On modifie le paramètre pour ajouter l’option mysql
+    export BM_ARCHIVE_METHOD="tarball mysql"
+    
+    # On peut aussi n’indiquer que les tables à sauvegarder plutôt que tout comme par défaut
+    export BM_MYSQL_DATABASES="__ALL__"
+    
+    # Utilisateur créé avec GRANT SHOW DATABASES,SHOW VIEW,SELECT,LOCK TABLES ON *.* TO 'backup-manager'@'localhost' IDENTIFIED BY 'mot de passe'
+    export BM_MYSQL_ADMINLOGIN="backup-manager"
+    export BM_MYSQL_ADMINPASS="mot de passe"
+    # Une seule archive SQL, sinon autant de fichiers que de bases sauvegardées
+    export BM_MYSQL_SEPARATELY="false"
+    
+    # On retire les tables SQL qui sont des vues (erreur 1044 sinon) ou celles qu’on veut exclure
+    export BM_MYSQL_DBEXCLUDE="information_schema performance_schema"
+
+
+
 On peut ensuite lancer manuellement la copie pour s'assurer que tout se passe bien :
 
 	backup-manager
