@@ -30,7 +30,7 @@ Ce guide permet d'installer et configurer un serveur Apache avec PHP pour servir
 Il suffit d'installer les paquages suivants :
 
 
-	apt-get install apache2 php7.0 php7.0-mbstring php7.0-xml php7.0-sqlite memcached php7.0-memcached php7.0-curl php7.0-zip
+	apt-get install apache2 php7.0 php7.0-mbstring php7.0-xml php7.0-sqlite memcached php7.0-memcached php7.0-curl php7.0-zip php-imagick imagemagick
 
 
 ## Configuration
