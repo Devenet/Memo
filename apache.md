@@ -111,6 +111,7 @@ On va activer les modules suivants :
 	a2enmod headers
 	a2enmod deflate
 	a2enmod http2
+	a2enmod expires
 
 On peut aussi en profiter pour modifier le paramètre `DirectoryIndex` (ordre de préférence des fichiers) dans le fichier `/etc/apache2/mods-available/dir.conf` :
 
