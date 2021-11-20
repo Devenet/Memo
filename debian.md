@@ -1,12 +1,12 @@
-# Installation et configuration d'un serveur sur Debian
+# Installation et configuration d’un serveur sur Debian
 
-Ce guide a été effectué et mis à jour pour une installation sur une Dedibox. Cependant, à part la première partie à adapter, le reste est valable quelque soit le serveur ;-)
+Ce guide a été effectué et mis à jour pour une installation sur une Dedibox. Cependant, à part la première partie à adapter, le reste est valable quelque soit le serveur.
 
 
 * [Serveur](#serveur)
 * [Première connexion](#première-connexion)
   * [Mots de passe](#mots-de-passe)
-  * [Service SSH](#servcie-ssh)
+  * [Service SSH](#service-ssh)
   * [Terminal](#terminal)
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
   * [Hostname](#hostname)
@@ -26,22 +26,24 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 
 # Serveur
 
-La première chose à faire est de choisir la distribution ; on prendra du Debian 64 bits.
+La première chose à faire est de choisir la distribution ; on prendra du Debian 64 bits, la version la plus récente.
 
-Pour le partitionnement, j'ai fait le choix suivant :
+Pour le partitionnement, j’ai fait le choix suivant :
 
-* __Boot__ : 200 Mo
+* __Boot__ : 512 Mo
 * __Swap__ : 4096 Mo (~ RAM)
 * __/__ : 80000 Mo (~ 80 Go pour le système)
 * __/data__ : ce qui reste
 
-On choisit ensuite le nom de la machine, les mots de passe (que l'on changera à notre première connexion !), et on attend que les opérations soient terminées pour la suite.
+(Si votre serveur sera pour du web avec gestion de fichiers d’utilisateurs, il est conseillé d’avoir une partition `tmp` dédiée.)
 
-_On peut en profiter pour activer le backup FTP que l'on configurera plus tard._
+On choisit ensuite le nom de la machine, les mots de passe (que l’on changera à notre première connexion !), et on attend que les opérations soient terminées pour la suite.
+
+_On peut en profiter pour activer le backup FTP que l’on configurera plus tard._
 
 # Première connexion
 
-Une fois que le serveur est prêt, on va pouvoir s'y connecter en SSH, sur le port 22.  
+Une fois que le serveur est prêt, on va pouvoir s’y connecter en SSH, sur le port 22.  
 
 ## Mots de passe
 
@@ -51,11 +53,11 @@ On change les mots de passe !
 
 ## Service SSH
 
-Puis on continue par configurer et sécuriser le service SSH (une fois en root) grâce au fichier `/etc/ssh/sshd_config` :
+On se rend dans le dossier `/etc/ssh`, et on va créer le fichier `sshd_config./servername.conf` qui va permettre de configurer et sécuriser le service SSH, avec les options suivantes :
 
-	Port XYZ
+	Port 1024
 
-	LoginGraceTime 120
+	LoginGraceTime 90
 	PermitRootLogin no
 	StrictModes yes
 	MaxAuthTries 3
@@ -63,6 +65,8 @@ Puis on continue par configurer et sécuriser le service SSH (une fois en root) 
 	AllowUsers username
 
 	X11Forwarding no
+	PrintMotd no
+	PrintLastLog yes
 
 On supprime ensuite les clefs SSH par défault :
 
@@ -82,11 +86,17 @@ On peut se déconnecter pour se reconnecter avec les nouveaux paramètres, et on
 
 On peut ajouter dans le fichier `~/.bashrc` de l'utilisateur les alias suivants pour les commandes usuelles :
 
-	alias ls='ls $LS_OPTIONS --color=auto'
-	alias ll='ls -al $LS_OPTIONS --color=auto'
+	alias ls='ls $LS_OPTIONS -F --color=auto'
+	alias ll='ls $LS_OPTIONS -AlFh --color=auto'
 	
 	alias upd='apt-get update'
 	alias upg='apt-get upgrade'
+
+	alias sizeh='du -hs *'
+	alias sizes='du -ms * | sort -g'
+
+	alias version="cat /etc/issue /etc/debian_version /etc/os-release"
+	
 
 Il faudra se reconnecter pour que les modifications soient prises en compte.
 
@@ -94,12 +104,12 @@ Il faudra se reconnecter pour que les modifications soient prises en compte.
 
 # Configuration et installation de paquets
 
-Avant l'installation d'un paquet, on vérifie toujours que son système est à jour :
+Avant l’installation d’un paquet, on vérifie toujours que son système est à jour :
 
 	apt-get update && apt-get upgrade
 
-Comme on a créé la partition `/data` pour stocker nos données, c'est dedans qu'on va mettre les données voire certains fichiers de configuration partagés.  
-Au niveau de l'arborescence, j'ai fait le choix suivant :
+Comme on a créé la partition `/data` pour stocker nos données, c'est dedans qu’on va mettre les données voire certains fichiers de configuration partagés.  
+Au niveau de l’arborescence, j’ai fait le choix suivant :
 
 	/data
 		/apache
@@ -121,34 +131,32 @@ Au niveau de l'arborescence, j'ai fait le choix suivant :
 On va modifier le fichier `/etc/hosts` pour y ajouter notre nom de domaine complet :
 
 	127.0.0.1       localhost
-	127.0.0.1       XYZ.dedibox.fr
-	127.0.1.1       name.domain.tld name
+	127.0.1.1       servername.domain.tld name
 
-On peut vérifier que c'est correct avec `hostname` puis `hostname -f`.
+On peut vérifier que c’est correct avec `hostname` puis `hostname -f`.
 
-_Si l'on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il faudrait modifier le fichier `/etc/network/interfaces`, voir [Attribution d'une IP fixe](https://github.com/Devenet/Memo/blob/master/raspberrypi.md#attribution-ip-fixe)._
+_Si l’on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il faudrait modifier le fichier `/etc/network/interfaces`, voir [Attribution d’une IP fixe](https://github.com/Devenet/Memo/blob/master/raspberrypi.md#attribution-ip-fixe)._
 
 ### IP externe dynamique
 
-Si votre serveur est hebergé par un professionnel ou que vous avez une IP fixe, il suffit de modifier vos entrées DNS pour que `name.domain.tld` pointe vers l'IP externe de votre serveur, et vous pouvez passer à la suite.  
+Si votre serveur est hebergé par un professionnel ou que vous avez une IP fixe, il suffit de modifier vos entrées DNS pour que `server.domain.tld` pointe vers l’IP publique de votre serveur, et vous pouvez passer à la suite.  
 
-Dans le cas où l'on ne possède qu'une adresse IP dynamique, il va falloir ruser en mettant à jour notre enregistrement DNS à chaque fois que l'IP change.  
-On a différentes manières de le faire, dont utiliser un service externe : DynDNS (payant maintenant !), No-Ip (limité à 3 hosts pour le compte gratuit), DynHost d'OVH, …  
-On va prendre l'exemple du service DynHost ; pour les autres services, il suffit d'adapter.
+Dans le cas où l’on ne possède qu’une adresse IP dynamique, il va falloir ruser en mettant à jour notre enregistrement DNS à chaque fois que l’IP change.  
+On a différentes manières de le faire, comme utiliser le service externe DynHost d’OVH.  
 
-On installe `ddclient` qui va permettre de mettre à jour automatiquement notre IP sur l'entrée DNS correspondante si elle a changé depuis la dernière fois :
+On installe `ddclient` qui va permettre de mettre à jour automatiquement notre IP sur l’entrée DNS correspondante si elle a changé depuis la dernière fois :
 
 	apt-get install ddclient
 
-Au moment de l'installation, on peut déjà préconfigurer certains paramètres :
+Au moment de l’installation, on peut déjà préconfigurer certains paramètres :
 
 * DNS service provider : `other`
 * Dynamic DNS server : `www.ovh.com`
 * DNS update protocol : `dyndns2`
-* Username : votre login
-* Password : votre mot de passe (stocké en clair)
+* Username : _votre login_
+* Password : _votre mot de passe (stocké en clair)_
 * Network interface : `eth0`
-* DynDns fully qualified domain names : `name.domain.tld`
+* DynDns fully qualified domain names : `servername.domain.tld`
 
 On peut maintenant modifier le fichier de configuration :
 
@@ -164,7 +172,7 @@ et on va changer et ajouter certains paramètres :
 
 On redémarre le service avec `service ddclient restart`.
 
-Pour vérifier que la mise à jour s'est bien effectuée, on peut visualiser le fichier `/var/cache/ddclient/ddclient.cache` et s'assurer que notre domaine pointe bien vers notre dernière IP.  
+Pour vérifier que la mise à jour s’est bien effectuée, on peut visualiser le fichier `/var/cache/ddclient/ddclient.cache` et s’assurer que notre domaine pointe bien vers notre dernière IP.  
 Sinon, on peut aussi lancer le service en mode debug avec `ddclient -daemon=0 -debug -verbose -noquiet`.
 
 ## SSH
@@ -174,29 +182,34 @@ Sinon on effectue les [changements](#première-connexion) !
 
 ### Notification de connexion
 
-On peut aussi ajouter une alerte lors de chaque connexion SSH.
-Pour cela, il suffit d'ajouter le fichier `/etc/ssh/sshrc` et d'y ajouter les actions souhaitées :
+On peut ajouter une alerte lors de chaque connexion SSH.
+Pour cela, il suffit d’ajouter le fichier `/etc/ssh/sshrc` et d’y ajouter les actions souhaitées :
 
+	#!/bin/bash
 	(
 	IP=`echo $SSH_CONNECTION | awk '{print $1}'`
+
 	REVERSE=`dig -x $IP +short`
 	if [ -z ${REVERSE} ]
-		then REVERSE="unknow"
+	  then REVERSE="unknow"
 	fi
 
-	echo "$USER connected on `hostname -f` from $IP ($REVERSE)" | mail -s "SSH connection" you@domain.tld
+	echo "Hello,
+
+	User “$USER” connected on `hostname -f` from $IP ($REVERSE)." | mail -a "From: Servername <servername@domain.tld>" -s "SSH connection for $USER" you@domain.tld
 	) &
 
-Le fait de déterminer le reverse de l'IP peut prendre plus de temps au moment de la connexion, c'est pour ça qu'on effectue l'opération dans un processus fils. Si c'est cependant encore trop gênant, il suffit de le désactiver.  
+
+Le fait de déterminer le reverse de l’IP peut prendre plus de temps au moment de la connexion, c’est pour ça qu’on effectue l’opération dans un processus fils. Si c’est cependant encore trop gênant, il suffit de le désactiver.  
 Le paquet `dnsutils` est nécessaire pour que la commande `dig` fonctionne.
 
-_Pour que l'envoi d'email fonctionne, on configurera `ssmtp` dans [la suite](#ssmtp)._
+_Pour que l’envoi d’e-mail fonctionne, on configurera `msmtp` dans [la suite](#msmtp)._
 
 ### Message of the Day
 
-Lors de la connexion (locale ou SSH) un message de bienvenue accueille l'utilisateur lors d'une connexion en ligne de commande.
+Lors de la connexion (locale ou SSH) un message de bienvenue accueille l’utilisateur lors d'une connexion en ligne de commande.
 
-Pour personnaliser ce message, il suffit de modifier (ou créer s'il n'existe pas) le fichier `/etc/motd`.
+Pour personnaliser ce message, il suffit de modifier ou créer le fichier `/etc/motd`.
 
 
 
@@ -204,7 +217,7 @@ Pour personnaliser ce message, il suffit de modifier (ou créer s'il n'existe pa
 
 ### msmtp
 
-Pour envoyer des emails, on installe :
+Pour envoyer des e-mails, on installe :
 
 	apt-get install mailutils msmtp msmtp-mta
 
@@ -216,34 +229,35 @@ On peut ensuite configurer msmtp via le fichier `/etc/msmtprc` à créer. Ici on
 	auth on
 	tls on
 	
-	account server@gmail.com
+	account servername@gmail.com
 	host smtp.gmail.com
 	port 587
 	tls_starttls on
-	user server@gmail.com
-	password <super_password_42>
-	from server@gmail.com
+	user servername@gmail.com
+	password complex_password
+	from servername@gmail.com
+	domain servername
 	
 	account default : server@gmail.com
 
-Pour vérifier que la configuration est bonne, il suffit de s'envoyer un email :
+Pour vérifier que la configuration est bonne, il suffit de s’envoyer un e-mail :
 
 	echo "Test OK" | mail -s "Hello world" you@domain.tld
-	# pour avoir plus d'information en cas d'erreur :
+	# pour avoir plus d'information en cas d’erreur :
 	echo "Test ?" | msmtprc you@domain.tld
 
 Penser à modifier le fichier `/etc/passwd` pour mettre à jour le nom des utilisateurs avec quelque chose de plus friendly :
 
-	root:x:0:0:Server Name:/root:/bin/bash
+	root:x:0:0:Servername:/root:/bin/bash
 
 Et ajouter un alias dans `/root/.bashrc` pour forcer le nom de l'expéditeur :
 
-	alias mail='mail -a "From: Server <server@domain.tld>"'
+	alias mail='mail -a "From: Servername <servername@domain.tld>"'
 
 
 #### Réponse automatique
 
-J'ai choisi que la boîte email du serveur ne servirait qu'à envoyer des emails, j'ai donc mis en place une réponse automatique (côté fournisseur de mon adresse email) :
+J’ai choisi que la boîte e-mail du serveur ne servirait qu’à envoyer des e-mails : j’ai mis en place une réponse automatique (côté fournisseur de mon adresse e-mail) :
 
 	Hello
 
@@ -257,12 +271,12 @@ J'ai choisi que la boîte email du serveur ne servirait qu'à envoyer des emails
 	Have a nice day!
 
 	--
-	Server name
+	Servername
 
 
 ### fail2ban
 
-Notre serveur étant connecté au web, on installe fail2ban qui permet de bannir une IP pour une durée en fonction de règles prédéfinies (tentatives infructeuses de connexion SSH, ...) :
+Notre serveur étant connecté au web, on installe fail2ban qui permet de bannir une IP pour une durée en fonction de règles prédéfinies (tentatives infructeuses de connexion SSH, …) :
 
 	 apt-get install fail2ban
 
@@ -274,14 +288,14 @@ Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2
 	maxretry = 3
 
 	destemail = you@domain.tld
-	sendername = Fail2Ban (Server)
-	sender = fail2ban@server.domain.tld
+	sendername = Servername
+	sender = servername@domain.tld
 	
 	mta = mail
 	action = %(action_mwl)s
 
-Ensuite, activer ou modifier les jails selon vos préférences. D'une manière générale n'hésitez pas à abaisser le nombre d'essais avant un bannissement.  
-Pour SSH, n'oubliez pas d'ajouter le nouveau port `port = ssh,XYZ`.
+Ensuite, activer ou modifier les jails selon vos préférences. D’une manière générale n’hésitez pas à abaisser le nombre d’essais avant bannissement.  
+Pour SSH, n’oubliez pas d’ajouter le nouveau port `port = ssh,XYZ`.
 
 On relance pour prendre en compte les modifications :
 
@@ -291,7 +305,7 @@ _Pour voir les statuts, utiliser la commande `fail2ban-client status`_.
 
 ### logwatch
 
-Pour recevoir par email un état journalier de notre serveur, on installe logwatch :
+Pour recevoir par e-mail un état journalier de notre serveur, on peut installer logwatch :
 
 	apt-get install logwatch
 	mkdir /var/cache/logwatch
@@ -301,48 +315,49 @@ On peut maintenant le modifier :
 
 	Output = mail
 	MailTo = you@domain.tld
-	MailFrom = Name <server@domain.tld>
+	MailFrom = Servername <servername@domain.tld>
 
 Pour tester et recevoir le premier rapport
 
 	logwatch --mail you@domain.tld
 
-Pour modifier le format de la rubrique HTTP et afficher les vhosts Apache, il est nécessaire de suivre ce [tutorial](http://romain.novalan.fr/wiki/LogWatch_Apache_/_HTTP_avec_Virtual_Host) de Romain.
+Pour modifier le format de la rubrique HTTP et afficher les vhosts Apache, il est nécessaire de suivre ce [tutorial](http://romain.novalan.fr/wiki/LogWatch_Apache_/_HTTP_avec_Virtual_Host).
 
 ### apticron
 
-Pour recevoir un email dès que des mises à jour sont disponibles sur votre server :
+Pour recevoir un e-mail dès que des mises à jour sont disponibles :
 
 	apt-get install apticron
 
-On configure le deamon grâce au fichier `/etc/apticron/apticron.conf` :
+On configure le service grâce au fichier `/etc/apticron/apticron.conf` :
 
 	EMAIL="you@domain.tld"
 	CUSTOM_FROM="server@domain.tld"
 
 ### unattended-upgrades
 
-Pour que les mises à jour critiques soient automatiquement faites (voir [cet article](http://www.tecmint.com/auto-install-security-updates-on-debian-and-ubuntu/)), on installe :
+Pour que les mises à jour critiques soient automatiquement faites (voir [cet article](https://wiki.debian.org/UnattendedUpgrades)), on installe :
 
 	apt-get install unattended-upgrades apt-listchanges
 
-On modifie le fichier `/etc/apt/apt.conf.d/20auto-upgrades` de configuration en ajoutant :
+On modifie le fichier `/etc/apt/apt.conf.d/50unattended-upgrades` de configuration (décommanter et compléter) :
 
-	APT::Periodic::AutocleanInterval "31";
+	Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+	Unattended-Upgrade::Remove-Unused-Dependencies "true";
+	Unattended-Upgrade::Mail "you@domain.tld";
 
-On modifie ensuite le fichier `/etc/apt/apt.conf.d/50unattended-upgrades` de configuration :
-
-	Unattended-Upgrade::Mail "dude@domain.tld";
-
-Et lance la configuration avec 
+On lance la configuration avec 
 
 	dpkg-reconfigure -plow unattended-upgrades
 
-That's it.
+Et on termine par modifier le fichier généré `/etc/apt/apt.conf.d/20auto-upgrades` en ajoutant :
+
+	APT::Periodic::AutocleanInterval "31";
+
 
 ## Apache 2 et PHP 7
 
-Reportez-vous au document [Installation et configuration d'Apache 2 et PHP 7](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
+Reportez-vous au document [Installation et configuration d’Apache 2 et PHP 7](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
 
 ## Git
 
@@ -352,9 +367,9 @@ On installe juste de quoi cloner et mettre à jour un dépôt :
 
 Sauf exception, les dépôts git seront clonés dans `/data/git`, et on fera des liens symboliques  vers les dépôts si besoin (permet, sauf exception, de rationnaliser).
 
-	ln -s /data/git/moodpicker /data/www/vhost/moods
+	ln -s /source/folder-source /target/other-folder/folder-target
 
-permet de faire une lien depuis la source `moodpicker` réelle vers le lien virtuel `moods`.
+permet de faire une lien depuis la source `folder-source` réelle vers le lien virtuel `folder-target`.
 
 
 Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne soit pas accessible en ajoutant dans `/etc/apache2/conf.d/security` les directives suivantes, si ce n'est pas déjà fait :
@@ -517,7 +532,7 @@ En fonction des graphes globaux que vous souhaitez, n'hésitez pas à adapter la
 
 ## Nextloud
 
-Je ne préfère pas installer Nextcloud depuis le paquet Debian ; on va donc télécharger l'archive depuis le site.
+Je ne préfère pas installer Nextcloud depuis le paquet Debian ; on va donc télécharger l’archive depuis le site.
 
 On va installer les fichiers web dans  `/data/www/nextcloud` et les données propres dans `/data/cloud`.
 
