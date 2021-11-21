@@ -587,9 +587,9 @@ On copie le fichier modèle `cp /etc/rsnapshot.conf.default /etc/rsnapshot.conf`
 	
 	cmd_cp		/usr/bin/cp
 
-	retain		hourly		6
-	retain		daily		7
-	retain		weekly		4
+	retain		a_hourly		12
+	retain		b_daily			7
+	retain		c_weekly		4
 
 	# Server
 	backup          /home/                          server/
@@ -625,9 +625,9 @@ Il suffit d’ajouter dans le fichier crontab les lignes suivantes (en fonction 
 
 	crontab -u root -e
 
-	0 */4 * * *       /usr/bin/rsnapshot hourly
-	30 23 * * *       /usr/bin/rsnapshot daily
-	00 23 * * 7       /usr/bin/rsnapshot weekly
+	0 */2 * * *       /usr/bin/rsnapshot a_hourly
+	30 23 * * *       /usr/bin/rsnapshot b_daily
+	00 23 * * 7       /usr/bin/rsnapshot c_weekly
 
 
 Pour effectuer une sauvergarde locale non programmée, la commande suivante suffit :
