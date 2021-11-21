@@ -616,7 +616,7 @@ On peut ensuite tester notre fichier de configuration et simuler une première i
 
 	rsnapshot configtest
 
-	rsnapshot -t hourly > /tmp/rsnap_test
+	rsnapshot -t a_hourly > /tmp/rsnap_test
 	cat /tmp/rsnap_test | less
 
 ### Automatisation
@@ -632,7 +632,7 @@ Il suffit d’ajouter dans le fichier crontab les lignes suivantes (en fonction 
 
 Pour effectuer une sauvergarde locale non programmée, la commande suivante suffit :
 
-	 rsnapshot hourly
+	 rsnapshot a_hourly
 
 Ainsi, on a une sauvegarde locale de l’état de nos données à différents moments. On peut donc récupérer un document dans son état la veille, etc.  
 Seulement ces backups sont stockés localement, on va donc devoir en faire une sauvegarde autre part.
