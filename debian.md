@@ -68,7 +68,7 @@ On se rend dans le dossier `/etc/ssh`, et on va créer le fichier `sshd_config./
 	PrintMotd no
 	PrintLastLog yes
 
-On supprime ensuite les clefs SSH par défault :
+On supprime ensuite les clefs SSH par défaut :
 
 	rm /etc/ssh/ssh_host_*
 
@@ -88,9 +88,6 @@ On peut ajouter dans le fichier `~/.bashrc` de l'utilisateur les alias suivants 
 
 	alias ls='ls $LS_OPTIONS -F --color=auto'
 	alias ll='ls $LS_OPTIONS -AlFh --color=auto'
-	
-	alias upd='apt-get update'
-	alias upg='apt-get upgrade'
 
 	alias sizeh='du -hs *'
 	alias sizes='du -ms * | sort -g'
@@ -106,16 +103,14 @@ Il faudra se reconnecter pour que les modifications soient prises en compte.
 
 Avant l’installation d’un paquet, on vérifie toujours que son système est à jour :
 
-	apt-get update && apt-get upgrade
+	apt update && apt upgrade
 
-Comme on a créé la partition `/data` pour stocker nos données, c'est dedans qu’on va mettre les données voire certains fichiers de configuration partagés.  
+Comme on a créé la partition `/data` pour stocker nos données, c’est dedans qu’on va mettre les données voire certains fichiers de configuration partagés.  
 Au niveau de l’arborescence, j’ai fait le choix suivant :
 
 	/data
-		/apache
-			/conf
-			/credentials
-		/backup
+		/apache-credentials
+		/backups
 		/cloud
 		/db
 			/munin
@@ -146,7 +141,7 @@ On a différentes manières de le faire, comme utiliser le service externe DynHo
 
 On installe `ddclient` qui va permettre de mettre à jour automatiquement notre IP sur l’entrée DNS correspondante si elle a changé depuis la dernière fois :
 
-	apt-get install ddclient
+	apt install ddclient
 
 Au moment de l’installation, on peut déjà préconfigurer certains paramètres :
 
@@ -207,7 +202,7 @@ _Pour que l’envoi d’e-mail fonctionne, on configurera `msmtp` dans [la suite
 
 ### Message of the Day
 
-Lors de la connexion (locale ou SSH) un message de bienvenue accueille l’utilisateur lors d'une connexion en ligne de commande.
+Lors de la connexion (locale ou SSH) un message de bienvenue accueille l’utilisateur lors d’une connexion en ligne de commande.
 
 Pour personnaliser ce message, il suffit de modifier ou créer le fichier `/etc/motd`.
 
@@ -219,9 +214,9 @@ Pour personnaliser ce message, il suffit de modifier ou créer le fichier `/etc/
 
 Pour envoyer des e-mails, on installe :
 
-	apt-get install mailutils msmtp msmtp-mta
+	apt install mailutils msmtp msmtp-mta
 
-On peut ensuite configurer msmtp via le fichier `/etc/msmtprc` à créer. Ici on suppose que l'on a un compte Gmail dédié pour le serveur ; à adapter selon votre fournisseur.
+On peut ensuite configurer msmtp via le fichier `/etc/msmtprc` à créer. Ici on suppose que l’on a un compte Gmail dédié pour le serveur ; à adapter selon votre fournisseur.
 
 	defaults
 	logfile /var/log/msmtp.log
@@ -243,14 +238,14 @@ On peut ensuite configurer msmtp via le fichier `/etc/msmtprc` à créer. Ici on
 Pour vérifier que la configuration est bonne, il suffit de s’envoyer un e-mail :
 
 	echo "Test OK" | mail -s "Hello world" you@domain.tld
-	# pour avoir plus d'information en cas d’erreur :
+	# pour avoir plus d’information en cas d’erreur :
 	echo "Test ?" | msmtprc you@domain.tld
 
 Penser à modifier le fichier `/etc/passwd` pour mettre à jour le nom des utilisateurs avec quelque chose de plus friendly :
 
 	root:x:0:0:Servername:/root:/bin/bash
 
-Et ajouter un alias dans `/root/.bashrc` pour forcer le nom de l'expéditeur :
+Et ajouter un alias dans `/root/.bashrc` pour forcer le nom de l’expéditeur :
 
 	alias mail='mail -a "From: Servername <servername@domain.tld>"'
 
@@ -278,9 +273,9 @@ J’ai choisi que la boîte e-mail du serveur ne servirait qu’à envoyer des e
 
 Notre serveur étant connecté au web, on installe fail2ban qui permet de bannir une IP pour une durée en fonction de règles prédéfinies (tentatives infructeuses de connexion SSH, …) :
 
-	 apt-get install fail2ban
+	 apt install fail2ban
 
-Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2ban/jail.local` et c'est ce dernier qu'on va modifier :
+Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2ban/jail.local` et c’est ce dernier qu’on va modifier :
 
 	ignoreip = 127.0.0.1/8 ::1
 	bantime  = 7200
@@ -307,7 +302,7 @@ _Pour voir les statuts, utiliser la commande `fail2ban-client status`_.
 
 Pour recevoir par e-mail un état journalier de notre serveur, on peut installer logwatch :
 
-	apt-get install logwatch
+	apt install logwatch
 	mkdir /var/cache/logwatch
 	cp /usr/share/logwatch/default.conf/logwatch.conf /etc/logwatch/conf/
 
@@ -321,13 +316,13 @@ Pour tester et recevoir le premier rapport
 
 	logwatch --mail you@domain.tld
 
-Pour modifier le format de la rubrique HTTP et afficher les vhosts Apache, il est nécessaire de suivre ce [tutorial](http://romain.novalan.fr/wiki/LogWatch_Apache_/_HTTP_avec_Virtual_Host).
+Pour modifier le format de la rubrique HTTP et afficher les _vhosts_ Apache, il est nécessaire de suivre ce [tutorial](http://romain.novalan.fr/wiki/LogWatch_Apache_/_HTTP_avec_Virtual_Host).
 
 ### apticron
 
 Pour recevoir un e-mail dès que des mises à jour sont disponibles :
 
-	apt-get install apticron
+	apt install apticron
 
 On configure le service grâce au fichier `/etc/apticron/apticron.conf` :
 
@@ -338,7 +333,7 @@ On configure le service grâce au fichier `/etc/apticron/apticron.conf` :
 
 Pour que les mises à jour critiques soient automatiquement faites (voir [cet article](https://wiki.debian.org/UnattendedUpgrades)), on installe :
 
-	apt-get install unattended-upgrades apt-listchanges
+	apt install unattended-upgrades apt-listchanges
 
 On modifie le fichier `/etc/apt/apt.conf.d/50unattended-upgrades` de configuration (décommanter et compléter) :
 
@@ -354,7 +349,6 @@ Et on termine par modifier le fichier généré `/etc/apt/apt.conf.d/20auto-upgr
 
 	APT::Periodic::AutocleanInterval "31";
 
-
 ## Apache 2 et PHP 7
 
 Reportez-vous au document [Installation et configuration d’Apache 2 et PHP 7](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
@@ -363,7 +357,7 @@ Reportez-vous au document [Installation et configuration d’Apache 2 et PHP 7](
 
 On installe juste de quoi cloner et mettre à jour un dépôt :
 
-	apt-get install git-core
+	apt install git-core
 
 Sauf exception, les dépôts git seront clonés dans `/data/git`, et on fera des liens symboliques  vers les dépôts si besoin (permet, sauf exception, de rationnaliser).
 
@@ -372,7 +366,7 @@ Sauf exception, les dépôts git seront clonés dans `/data/git`, et on fera des
 permet de faire une lien depuis la source `folder-source` réelle vers le lien virtuel `folder-target`.
 
 
-Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne soit pas accessible en ajoutant dans `/etc/apache2/conf.d/security` les directives suivantes, si ce n'est pas déjà fait :
+Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne soit pas accessible en ajoutant dans `/etc/apache2/conf.d/security` les directives suivantes, si ce n’est pas déjà fait :
 
 	<DirectoryMatch "/\.git">
 		Deny from all
@@ -386,32 +380,32 @@ Munin "server" récupère les infos à partir des Munin "nodes". Notre Dedibox s
 
 On va donc installer simplement :
 
-	apt-get install munin
+	apt install munin
 
-Si seul le nœud nous intéresse, il suffit de faire un `apt-get install munin-node`.
+Si seul le nœud nous intéresse, il suffit de faire un `apt install munin-node`.
 
 ### Munin node
 
 #### Paramètres
 
-Il faut regarder du côté de `/etc/munin/munin-node.conf`. On vérifie qu'on s'autorise à écouter le nœud pour récupérer les informations :
+Il faut regarder du côté de `/etc/munin/munin-node.conf`. On vérifie qu’on s’autorise à écouter le nœud pour récupérer les informations :
 
 	allow ^127\.0\.0\.1$
 	allow ^::1$
 
-Pour le cas d'un nœud de notre réseau, il faudra insérer l'IP du serveur :
+Pour le cas d’un nœud de notre réseau, il faudra insérer l’IP du serveur :
 
 	allow ^172\.16\.0\.42$
 
-_Si, malheureusement, le serveur (qui héberge Munin serveur) a une adresse IP dynamique, il faudra ruser en autorisant n'importe quelle IP avec :_
+_Si, malheureusement, le serveur (qui héberge Munin serveur) a une adresse IP dynamique, il faudra ruser en autorisant n’importe quelle IP avec :_
 
 	allow ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
 
-_Néanmoins, celle solution permet à n'importe qui connaissant votre IP de demander et recevoir les informations, ce qui est donc à éviter !_
+_Néanmoins, celle solution permet à n’importe qui connaissant votre IP de demander et recevoir les informations, ce qui est donc à éviter !_
 
 #### Plugins
 
-La documentation disponible sur le site francophone d'Ubuntu est assez complète : [doc.ubuntu-fr.org/munin](http://doc.ubuntu-fr.org/munin#munin-node_le_demon_sur_les_noeuds).
+La documentation disponible sur le site francophone d’Ubuntu est assez complète : [doc.ubuntu-fr.org/munin](http://doc.ubuntu-fr.org/munin#munin-node_le_demon_sur_les_noeuds).
 
 	munin-node-configure --suggest --shell
 	munin-run processes --debug
@@ -466,7 +460,7 @@ Vous verrez le changement lors de la prochaine itération de Munin.
 
 #### Tâche CRON
 
-Par défaut Munin server s'exécute toutes les 5 minutes pour récupérer les données et générer le HTML et les graphes. Cela peut utiliser beaucoup de ressources (sur un Rapsberry Pi par exemple) ; on peut donc générer le HTML et les graphes moins régulièrement.
+Par défaut Munin server s’exécute toutes les 5 minutes pour récupérer les données et générer le HTML et les graphes. Cela peut utiliser beaucoup de ressources (sur un Rapsberry Pi par exemple) ; on peut donc générer le HTML et les graphes moins régulièrement.
 
 Il suffit de modifier le fichier `/usr/bin/munin-cron` en :
 
@@ -487,9 +481,9 @@ Ici, on ne génère le HTML et les graphes que toutes les `30` minutes.
 
 #### Graphes récapitulatifs
 
-Si vous monitorez plusieurs hosts, en plus des pages de comparaison, vous souhaitez peut-être avoir sur le même graphe des courbes de comparaison de vos nœuds, ou simplement avoir un graphe totalisant les valeurs d'un même type de graphe pour tous vos nœuds.
+Si vous monitorez plusieurs hosts, en plus des pages de comparaison, vous souhaitez peut-être avoir sur le même graphe des courbes de comparaison de vos nœuds, ou simplement avoir un graphe totalisant les valeurs d’un même type de graphe pour tous vos nœuds.
 
-Pour cela, il est nécessaire de modifier le fichier de configuration du serveur Munin `/etc/munin/munin.conf` et d'y ajouter un nœud virtuel.
+Pour cela, il est nécessaire de modifier le fichier de configuration du serveur Munin `/etc/munin/munin.conf` et d’y ajouter un nœud virtuel.
 
 	[domain.tld;global]
         update no
@@ -527,8 +521,8 @@ Pour cela, il est nécessaire de modifier le fichier de configuration du serveur
     [domain.tld;]
         node_order myhost.domain.tld other-host.domain.tld global
 
-La dernière directive permet de changer l'ordre d'affichage (par défaut alphabétique).  
-En fonction des graphes globaux que vous souhaitez, n'hésitez pas à adapter la configuration.
+La dernière directive permet de changer l’ordre d’affichage (par défaut alphabétique).  
+En fonction des graphes globaux que vous souhaitez, n’hésitez pas à adapter la configuration.
 
 ## Nextloud
 
@@ -542,13 +536,13 @@ On va installer les fichiers web dans  `/data/www/nextcloud` et les données pro
 
 On installe aussi le support de PHP GD :
 
-	apt-get install php5-gd
+	apt install php-gd
 
-On créé ensuite un vhost dans Apache et on peut accéder à l'URL souhaitée pour la configuration.  
+On créé ensuite un _vhost_ dans Apache et on peut accéder à l’URL souhaitée pour la configuration.  
 
-Si vous ne disposez que de peu d'utilisateurs qui s'y connecteront (ou pour de petites machines), il suffit de choisir SQLite comme base de données. Sinon on prendra MySQL.
+Si vous ne disposez que de peu d’utilisateurs qui s’y connecteront (ou pour de petites machines), il suffit de choisir SQLite comme base de données. Sinon on prendra MariaDB / MySQL.
 
-Pour activer les tâches CRON nécessaires, on lancer l'éditeur CRON pour l'utilisateur `www-data` d'Apache :
+Pour activer les tâches CRON nécessaires, on lance l’éditeur CRON pour l’utilisateur `www-data` d’Apache :
 
 	crontab -u www-data -e
 
@@ -556,7 +550,7 @@ Et on peut ajouter la ligne suivante :
 
 	*/15  *  *  *  * php -f /data/www/nextcloud/cron.php
 
-Après avoir configurer les utilisateurs et la configuration via l'application web, on va aller modifier le fichier `/data/www/nextcloud/config/config.php` :
+Après avoir configurer les utilisateurs et la configuration via l’application web, on va aller modifier le fichier `/data/www/nextcloud/config/config.php` :
 
 	'asset-pipeline.enabled' => true,
 	'knowledgebaseenabled' => false,
@@ -568,8 +562,6 @@ Après avoir configurer les utilisateurs et la configuration via l'application w
 	'mail_smtpmode' => 'php',
 	'maintenance' => false
 
-_Si vous souhaitez modifier le thème, je vous redirige vers [cet article](http://blog.nicolabricot.com/post/2014/modifier-et-configurer-son-theme-owncloud-ou-comment-changer-le-titre-le-pied-de-page-et-le-slogan)._
-
 
 ***
 
@@ -577,16 +569,23 @@ _Si vous souhaitez modifier le thème, je vous redirige vers [cet article](http:
 
 ## Sauvegardes incrémentales locales
 
-On va sauvegarder localement à intervalles réguliers l'état de nos données à différents moments.
+On va sauvegarder localement à intervalles réguliers l’état de nos données à différents moments.
 
-	apt-get install rsnapshot
-	cp /etc/rsnapshot.conf /etc/rsnapshot.conf.default
+
+Ce paquet [n’étant plus distribué](https://github.com/rsnapshot/rsnapshot/issues/279#issuecomment-944907068) depuis Debian 11 (Bullseye), on ne peut plus faire `apt install rsnapshot`. Heureusement il est encore possible de l’installer manuellement :
+
+	wget https://github.com/rsnapshot/rsnapshot/releases/download/1.4.4/rsnapshot_1.4.4-1_all.deb
+	chown _apt ./rsnapshot_1.4.4-1_all.deb
+	apt install ./rsnapshot_1.4.4-1_all.deb
+
 
 ### Configuration
 
-On peut maintenant modifier le fichier `/etc/rsnapshot.conf` avec notre configuration :
+On copie le fichier modèle `cp /etc/rsnapshot.conf.default /etc/rsnapshot.conf` pour ensuite modifier ce dernier avec notre configuration :
 
-	snapshot_root	/data/backup/
+	snapshot_root	/data/backups/
+	
+	cmd_cp		/usr/bin/cp
 
 	retain		hourly		6
 	retain		daily		7
@@ -594,24 +593,24 @@ On peut maintenant modifier le fichier `/etc/rsnapshot.conf` avec notre configur
 
 	# Server
 	backup          /home/                          server/
-	backup          /root/                          server/
-	backup          /etc/                           server/
-	backup          /usr/local/                     server/
+	backup		/root/				server/
+	backup		/etc/				server/
+	backup		/usr/local/			server/
 	
-	backup          /data/apache/                   server/
-	backup          /data/db/                       server/
-	backup          /data/cloud/                    server/
-	backup          /data/git/                      server/
-	backup          /data/www/                      server/
+	backup		/data/apache-credentials/	server/
+	backup		/data/cloud/			server/
+	backup		/data/db/			server/
+	backup		/data/git/			server/
+	backup		/data/www/			server/
 	
-	backup          /var/www/                       server/
-	backup          /var/spool/cron/crontabs/       server/
+	backup		/var/www/			server/
+	backup		/var/spool/cron/crontabs/	server/
 
 
 * Les intervalles sont à choisir en fonction de ce que vous voulez et de la sécurité des sauvegardes vous souhaitez.
 * Les répertoires à sauvegarder aussi ; dans mon cas je sauvegarde les données présentes sur `/data` et les fichiers de configuration intéressants de `/etc`.
-* Il est possible de faire exécuter un script avant et après l'exécution de rsnapshot avec `cmd_preexec` ou `cmd_postexec`.
-* Vérifier bien que ce sont de vraies tabulations qui séparent les données.
+* Il est possible de faire exécuter un script avant et après l’exécution de rsnapshot avec `cmd_preexec` ou `cmd_postexec`.
+* Vérifiez bien que ce sont de vraies tabulations qui séparent les données.
 
 On peut ensuite tester notre fichier de configuration et simuler une première itération pour voir les actions qui seraient effectuées :
 
@@ -622,7 +621,7 @@ On peut ensuite tester notre fichier de configuration et simuler une première i
 
 ### Automatisation
 
-Il suffit d'ajouter dans le fichier crontab les lignes suivantes (en fonction des intervalles de sauvegarde que vous avez choisi !)
+Il suffit d’ajouter dans le fichier crontab les lignes suivantes (en fonction des intervalles de sauvegarde que vous avez choisi !)
 
 	crontab -u root -e
 
@@ -635,29 +634,37 @@ Pour effectuer une sauvergarde locale non programmée, la commande suivante suff
 
 	 rsnapshot hourly
 
-Ainsi, on a une sauvegarde locale de l'état de nos données à différents moments. On peut donc récupérer un document dans son état la veille, etc.  
+Ainsi, on a une sauvegarde locale de l’état de nos données à différents moments. On peut donc récupérer un document dans son état la veille, etc.  
 Seulement ces backups sont stockés localement, on va donc devoir en faire une sauvegarde autre part.
 
 ## Sauvegardes externes
 
-Pour sécuriser nos sauvergardes locales incrémentales, on va utiliser l'espace de stockage FTP fourni dans l'offre Dédibox.  
+Pour sécuriser nos sauvergardes locales incrémentales, on va utiliser l’espace de stockage FTP fourni dans l’offre Dedibox.  
 Le paquet `rsync` ne permet pas directement de sauvegarder sur un FTP, on va donc utiliser `backup-manager` :
 
-	apt-get install backup-manager
+	apt install backup-manager
 	cp backup-manager.conf backup-manager.conf.default
 
 ### Configuration
 
 On peut maintenant modifier la configuration du fichier `/etc/backup-manager.conf` pour coller avec nos souhaits :
 
-	export BM_ARCHIVE_TTL="0"
-	export BM_TARBALL_DIRECTORIES="/data/backup"
+	export BM_ARCHIVE_TTL="1"
+	export BM_ARCHIVE_NICE_LEVEL="0"
+
+	export BM_TARBALL_DIRECTORIES="/data/backups"
+	
+
+	export BM_MYSQL_SEPARATELY="false"
+	export BM_MYSQL_DBEXCLUDE="information_schema performance_schema"
 
 	export BM_UPLOAD_METHOD="ftp"
 	export BM_UPLOAD_DESTINATION="/backups"
+	
 	export BM_UPLOAD_FTP_USER="ftp-user"
 	export BM_UPLOAD_FTP_PASSWORD="ftp-password"
 	export BM_UPLOAD_FTP_HOSTS="ftp-host.domain.tld"
+	export BM_UPLOAD_FTP_TTL="8"
 
 	export BM_BURNING_METHOD="none"
 
@@ -676,6 +683,10 @@ Si on veut sauvegarder sa base de données SQL (en local + export FTP) :
     # Utilisateur créé avec GRANT SHOW DATABASES,SHOW VIEW,SELECT,LOCK TABLES ON *.* TO 'backup-manager'@'localhost' IDENTIFIED BY 'mot de passe'
     export BM_MYSQL_ADMINLOGIN="backup-manager"
     export BM_MYSQL_ADMINPASS="mot de passe"
+    
+    # Pour exporter le fichier au format gzip plutôt que bzip2
+    export BM_MYSQL_FILETYPE="gzip"
+	
     # Une seule archive SQL, sinon autant de fichiers que de bases sauvegardées
     export BM_MYSQL_SEPARATELY="false"
     
@@ -684,9 +695,9 @@ Si on veut sauvegarder sa base de données SQL (en local + export FTP) :
 
 
 
-On peut ensuite lancer manuellement la copie pour s'assurer que tout se passe bien :
+On peut ensuite lancer manuellement la copie pour s’assurer que tout se passe bien :
 
-	backup-manager
+	backup-manager -v
 
 Pour vérifier que notre archive a bien été déposée, on se connecte au FTP
 
@@ -704,18 +715,18 @@ Comme pour les sauvegardes locales, on utilise les tâches CRON :
 
 	crontab -u root -e
 
-	0 1 * * *       /usr/sbin/backup-manager -v | mail -s "[Backup] Synchronization performed" you@domain.tld
+	30 1 * * *	/usr/sbin/backup-manager -v | mail -a "From: Servername <servername@domain.tld" -s "[Backup] Synchronization performed" you@domain.tld
 
-Ici, les sauvergades seront envoyées sur le serveur FTP tous les jours à 1 heure du matin.
+Ici, les sauvergades seront envoyées sur le serveur FTP tous les jours à 1 h 30 du matin.
 
-## Vérification/récupération d'une sauvegarde
+## Vérification/récupération d’une sauvegarde
 
-C'est bien on a mis en place une sauvegarde locale incrémentale et une sauvergade externe de ces sauvegardes incrémentales.  
+C’est bien on a mis en place une sauvegarde locale incrémentale et une sauvergade externe de ces sauvegardes incrémentales.  
 Mettons nous dans le cas où nous aurions besoin de récupérer une sauvegarde !
 
 ### Sauvegerde locale
 
-S'il s'agit d'un ou plusieurs fichiers modifiés il y a peu de temps, on peut aller les récupérer grâce à notre sauvegarde locale dans `/data/backup`.
+S’il s’agit d’un ou plusieurs fichiers modifiés il y a peu de temps, on peut aller les récupérer grâce à notre sauvegarde locale dans `/data/backups`.
 
 Il suffit juste de savoir quelle version nous intéresse (il y a 2 heures, il y 2 jours, il y a 1 semaine ?).
 
@@ -723,21 +734,21 @@ Il suffit juste de savoir quelle version nous intéresse (il y a 2 heures, il y 
 
 Si notre disque a crashé, ou si le dossier des sauvegardes locales est inutilisable, on peut respirer et se tourner vers le backup sur le serveur FTP.
 
-On s'y connecte et on liste les fichiers disponibles :
+On s’y connecte et on liste les fichiers disponibles :
 
 	ftp -n ftp-host.domain.tld
 	ftp> user ftp-user ftp-password
 	ftp> passive
 	ftp> ls backups
 
-Ensuite, il faut rapatrier l'archive qui nous intéresse localement avec
+Ensuite, il faut rapatrier l’archive qui nous intéresse localement avec
 
 	ftp> cd backups
 	ftp> get nom_du_backup.date.tar.gz
 	ftp> exit
 
-On a maintenant le fichier en local, qu'on extrait et que l'on peut parcourir pour récupérer le ou les fichiers souhaités :-)
+On a maintenant le fichier en local, qu’on extrait et que l’on peut parcourir pour récupérer le ou les fichiers souhaités :-)
 
 	tar -xvzf nom_du_backup.date.tar.gz
 
-Même si cette manipulation ne serait à faire qu'en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu'elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n'avez pas oublié des fichiers à sauvegarder ;-)
+Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
