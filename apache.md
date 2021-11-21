@@ -22,6 +22,8 @@ Ce guide permet d’installer et configurer un serveur Apache avec PHP pour serv
 	* [Configuration des vhost SSL](#configuration-des-vhost-ssl)
 * [Application des paramètres](#application-des-paramètres)
 * [Statistiques d’utilisation](#statistiques-dutilisation)
+	* [Webalizer](#webalizer)
+	* [Munin](#munin)	
 
 ***
 
@@ -357,4 +359,14 @@ On peut aussi relancer le server avec `service apache2 reload` pour certains cha
 
 ## Statistiques d’utilisation
 
+### Webalizer
+
 Si vous souhaitez connaître quelques statistiques sur l’utilisation d’Apache, en se basant sur les logs, vous pouvez suivre [Installation et configuration de Webalizer pour Apache](webalizer.md).
+
+### Munin
+
+Si vous avez activé les plugins Apache pour Munin, mais qu’il n’y a aucune donnée… deux pistes :
+
+1. Assurez-vous que le module `status` d’Apache est bien activé : `a2enmod status`.
+2. Ça peut venir d’une dépendance manquante utilisée par Munin.  
+   Lançon en mode test la commande utilisée par Munin : `munin-run apache_accesses --debug`. Si l’erreur affichée est « LWP::UserAgent not found », il faut alors installer la bibliothèque Perl manquante avec `apt install libparse-http-useragent-perl`.
