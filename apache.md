@@ -6,7 +6,7 @@ Ce guide permet d’installer et configurer un serveur Apache avec PHP pour serv
 * [Configuration](#configuration)
 	* [Sécurisation](#sécurisation)
 	* [Format des logs](#format-des-logs)
-	* [Support des fichiers XML](#support-des-fichiers-xml)
+	* [Support des fichiers RSS](#support-des-fichiers-rss)
 	* [Images favicon](#images-favicon)
 	* [Modules](#modules)
 	* [Envoi d'e-mails](#envoi-de-mails)
@@ -18,9 +18,10 @@ Ce guide permet d’installer et configurer un serveur Apache avec PHP pour serv
 * [Authentification](#authentification)
 * [Activation du SSL (HHTPS)](#activation-du-ssl-https)
 	* [Certificat auto-signé](#certificat-auto-signé)
-	* [Écoute sur le port 443](#ecoute-sur-le-port-443)
+	* [Écoute sur le port 443](#écoute-sur-le-port-443)
 	* [Configuration des vhost SSL](#configuration-des-vhost-ssl)
 * [Application des paramètres](#application-des-paramètres)
+* [Statistiques d’utilisation](#statistiques-dutilisation)
 
 ***
 
@@ -30,13 +31,13 @@ Ce guide permet d’installer et configurer un serveur Apache avec PHP pour serv
 Il suffit d’installer les paquages suivants :
 
 
-	apt-get install apache2 php php-common php-cli php-fpm php-json php-pdo php-sqlite3 php-zip php-gd php-mbstring php-curl php-xml memcached php-memcached php-imagick imagemagick
+	apt install apache2 php php-common php-cli php-fpm php-json php-pdo php-sqlite3 php-zip php-gd php-mbstring php-curl php-xml memcached php-memcached php-imagick imagemagick
 
 On peut aussi installer d’autres extensions selon les besoins, par exemple `php-pear`, `php-bcmath`.
 
 Pour utiliser PHP avec Apache (ce qui est un peu le but), on installe :
 
-	apt-get install libapache2-mod-php
+	apt install libapache2-mod-php
 
 
 ## Configuration
@@ -213,7 +214,7 @@ Une fois que les deux précédents _vhosts_ sont configurés, on peut maintenant
 ### Proxy vhost
 
 Apache permet de configurer un _virtual host_ pour l’utiliser comme un proxy et accéder à un élément de réseau interne qui n’est (directement) pas accessible depuis l’extérieur.  
-Par exemple si l’on souhaite pouvoir accéder au site web hébergé sur `192.168.1.1` (l’administration de votre box par exemple) qui n’est pas accessible depuis Internet, on peut configuer un vhost pour qu’il fasse le relais.
+Par exemple si l’on souhaite pouvoir accéder au site web hébergé sur `192.168.1.1` (l’administration de votre box par exemple) qui n’est pas accessible depuis Internet, on peut configuer un _vhost_ pour qu’il fasse le relais.
 
 __Notez bien que cela peut faciliter le piratage de votre réseau, à faire en connaissance de cause !__
 
@@ -255,7 +256,7 @@ Il faut activer le module suivant pour supporter l’authentification par groupe
 
 	a2enmod authz_groupfile
 
-Dans la configuration du _vhost_ précédent, on a inclus le fichier de configuration `auth_server.conf` (permet de l’inclure depuis plusieurs vhosts) :
+Dans la configuration du _vhost_ précédent, on a inclus le fichier de configuration `auth_server.conf` (permet de l’inclure depuis plusieurs _vhosts_) :
 
 		AuthType Basic
 		AuthName "Beta area"
@@ -283,7 +284,7 @@ On suppose que l’on a déjà les certificats qui seront utilisés, hormis le c
 
 ### Certificat auto-signé
 
-Ce certificat est utilisé pour le vhost SSL par « défaut ».  
+Ce certificat est utilisé pour le _vhost_ SSL par « défaut ».  
 Il suffit de taper la commande suivante et d’y entrer les informations nécessaires (dans mon cas, comme je souhaite donner le moins d’informations, je ne renseigne que les champs obligatoires : le pays (EU), la province (Europe) et l’organisation (Domain)) :
 
 	openssl req -x509  -newkey rsa:2048 -nodes -days 365 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -353,3 +354,7 @@ On redémarre ensuite le serveur pour que les modifications soient prises en com
 	service apache2 restart
 
 On peut aussi relancer le server avec `service apache2 reload` pour certains changements qui ne nécessitent pas le rédémarrage du service.
+
+## Statistiques d’utilisation
+
+Si vous souhaitez connaître quelques statistiques sur l’utilisation d’Apache, en se basant sur les logs, vous pouvez suivre [Installation et configuration de Webalizer pour Apache](webalizer.md).
