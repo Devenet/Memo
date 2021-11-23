@@ -10,6 +10,7 @@ Ce guide permet d’installer et configurer un serveur Apache avec PHP pour serv
 	* [Images favicon](#images-favicon)
 	* [Modules](#modules)
 	* [Envoi d'e-mails](#envoi-de-mails)
+	* [HTTP2 et UTF-8](#http2-et-utf-8)
 * [Virual hosts](#virtual-hosts)
 	* [Default vhost](#default-vhost)
 	* [Local vhost](#local-vhost)
@@ -46,13 +47,17 @@ Pour utiliser PHP avec Apache (ce qui est un peu le but), on installe :
 
 ### Sécurisation
 
+Dans le fichier `/etc/apache2/conf-available/apache2.conf`, on diminue la valeur par défaut du timeout :
+
+	Timeout 60
+
 Dans le fichier `/etc/apache2/conf-available/security.conf`, on vérifie que les directives suivantes sont bien configurées :
 
 	ServerTokens Prod
 	ServerSignature Off
 	TraceEnable Off
 
-On décommente (début du fichier normalement) et ajoute le paramétrage pour désactiver le listage des dossiers sans fichier d’index :
+On décommente (début du fichier normalement) et ajoute le paramétrage pour désactiver le listage des dossiers sans fichier d’index :
 
 	<Directory />
 		Options -Indexes
@@ -126,6 +131,29 @@ On peut aussi en profiter pour modifier le paramètre `DirectoryIndex` (ordre de
 Penser à modifier le fichier `/etc/passwd` pour mettre à jour l’utilisateur `www-data` avec quelque chose de plus friendly si Apache est amené à envoyer des e-mails :
 
 	www-data:x:33:33:Servername:/var/www:/bin/sh
+	
+### HTTP2 et UTF-8
+
+Pour activer HTTP2, il faut :
+
+	a2dismod php7.4
+	a2dismod mpm_prefork
+	a2enmod mpm_event
+	a2enmod http2
+	systemctl restart apache2
+	
+Ensuite, on ajoute ces directives dans le fichier `/etc/apache2/conf-available/custom.conf`, ainsi que la configuration des fichiers qui seront servis par défaut en UTF-8 :
+
+	FileETag None
+
+	<IfModule mod_ssl.c>
+		Protocols h2 http/1.1
+	</IfModule>
+	
+	AddCharset UTF-8 .php .html .htm .css .js .xml .rss .json .svg .txt .md
+
+On l’active avec `a2enconf custom` et on relance Apache avec `systemctl reload apache2`.
+
 
 ## Virtual hosts
 
