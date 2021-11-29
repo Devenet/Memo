@@ -11,6 +11,7 @@ Ce guide permet d’installer et configurer un serveur Apache avec PHP pour serv
 	* [Modules](#modules)
 	* [Envoi d'e-mails](#envoi-de-mails)
 	* [HTTP2 et UTF-8](#http2-et-utf-8)
+	* [PHP7 FPM](php7-fpm)
 * [Virual hosts](#virtual-hosts)
 	* [Default vhost](#default-vhost)
 	* [Local vhost](#local-vhost)
@@ -154,6 +155,22 @@ Ensuite, on ajoute ces directives dans le fichier `/etc/apache2/conf-available/c
 
 On l’active avec `a2enconf custom` et on relance Apache avec `systemctl reload apache2`.
 
+### PHP7 FPM
+
+On paramètre le module PHP-FPM pour n’être utilisé que si le fichier PHP à servir existe bien.  
+Cela évite des erreurs "File not found" ou "AH01071: Got error 'Primary script unknown'".
+
+On modifie le fichier `/etc/apache2/conf-available/php7.4-fpm.conf`
+
+	# <FilesMatch ".+\.ph(ar|p|tml)$">
+	#	SetHandler "proxy:unix:/run/php/php7.4-fpm.sock|fcgi://localhost"
+	# </FilesMatch>
+	
+	<FilesMatch ".+\.ph(ar|p|tml)$">
+        	<If "-f %{REQUEST_FILENAME}">
+			SetHandler "proxy:unix:/run/php/php7.4-fpm.sock|fcgi://localhost"
+		</If>
+   	</FilesMatch>
 
 ## Virtual hosts
 
