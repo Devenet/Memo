@@ -93,6 +93,8 @@ On peut ajouter dans le fichier `~/.bashrc` de l'utilisateur les alias suivants 
 	alias sizes='du -ms * | sort -g'
 
 	alias version="cat /etc/issue /etc/debian_version /etc/os-release"
+
+        alias mail='mail -a "From: Server <server@domain.tld>"'
 	
 
 Il faudra se reconnecter pour que les modifications soient prises en compte.
