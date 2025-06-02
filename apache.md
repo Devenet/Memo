@@ -1,4 +1,4 @@
-# Installation et configuration d’Apache 2 et PHP 7
+# Installation et configuration d’Apache 2 et PHP 8
 
 Ce guide permet d’installer et configurer un serveur Apache avec PHP pour servir plusieurs sites web.
 
@@ -137,7 +137,7 @@ Penser à modifier le fichier `/etc/passwd` pour mettre à jour l’utilisateur 
 
 Pour activer HTTP2, il faut :
 
-	a2dismod php7.4
+	a2dismod php8.2
 	a2dismod mpm_prefork
 	a2enmod mpm_event
 	a2enmod http2
@@ -332,7 +332,7 @@ On suppose que l’on a déjà les certificats qui seront utilisés, hormis le c
 ### Certificat auto-signé
 
 Ce certificat est utilisé pour le _vhost_ SSL par « défaut ».  
-Il suffit de taper la commande suivante et d’y entrer les informations nécessaires (dans mon cas, comme je souhaite donner le moins d’informations, je ne renseigne que les champs obligatoires : le pays (EU), la province (Europe) et l’organisation (Domain)) :
+Il suffit de taper la commande suivante et d’y entrer les informations nécessaires (dans mon cas, comme je souhaite donner le moins d’informations, je ne renseigne que l’organisation, pour les autres champs j’indique `.` pour laisser vide) :
 
 	openssl req -x509  -newkey rsa:2048 -nodes -days 365 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem
 
