@@ -12,7 +12,7 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
   * [Hostname](#hostname)
   * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
   * [Utilitaires](#utilitaires) : _[msmtp](#msmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron), [unattended-upgrades](#unattended-upgrades)_
-  * [Apache2 et PHP 7](#apache-2-et-php-7) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
+  * [Apache2 et PHP 8](#apache-2-et-php-8) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
   * [Git](#git)
   * [Munin](#munin): _[Munin node](#munin-node), [Munin server](#munin-server)_
   * [Nextcloud](#nextcloud)
@@ -349,9 +349,9 @@ Et on termine par modifier le fichier généré `/etc/apt/apt.conf.d/20auto-upgr
 
 	APT::Periodic::AutocleanInterval "31";
 
-## Apache 2 et PHP 7
+## Apache 2 et PHP 8
 
-Reportez-vous au document [Installation et configuration d’Apache 2 et PHP 7](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
+Reportez-vous au document [Installation et configuration d’Apache 2 et PHP 8](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
 
 ## Git
 
