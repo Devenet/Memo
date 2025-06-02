@@ -524,7 +524,7 @@ Pour cela, il est nécessaire de modifier le fichier de configuration du serveur
 La dernière directive permet de changer l’ordre d’affichage (par défaut alphabétique).  
 En fonction des graphes globaux que vous souhaitez, n’hésitez pas à adapter la configuration.
 
-## Nextloud
+## Nextcloud
 
 Je ne préfère pas installer Nextcloud depuis le paquet Debian ; on va donc télécharger l’archive depuis le site.
 
@@ -561,6 +561,11 @@ Après avoir configurer les utilisateurs et la configuration via l’application
 	'mail_from_address' => 'cloud',
 	'mail_smtpmode' => 'php',
 	'maintenance' => false
+
+
+Si on a besoin de lancer une commande Nextcloud depuis un autre utilisateur, on peut utiliser :
+
+        su - www-data -s /bin/bash -c '/usr/bin/php /data/www/nextcloud/occ maintenance:repair --include-expensive'
 
 
 ***
