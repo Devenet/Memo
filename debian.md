@@ -11,9 +11,9 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
   * [Hostname](#hostname)
   * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
-  * [Utilitaires](#utilitaires) : _[msmtp](#msmtp), [fail2ban](#fail2ban), [logwatch](#logwatch), [apticron](#apticron), [unattended-upgrades](#unattended-upgrades)_
-  * [Apache2 et PHP 8](#apache-2-et-php-8) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
+  * [Utilitaires](#utilitaires) : _[msmtp](#msmtp), [fail2ban](#fail2ban), [apticron](#apticron), [unattended-upgrades](#unattended-upgrades)_
   * [Git](#git)
+  * [Apache2 et PHP 8](#apache-2-et-php-8) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
   * [Munin](#munin): _[Munin node](#munin-node), [Munin server](#munin-server)_
   * [Nextcloud](#nextcloud)
 * [Mise en place de sauvegardes](#mise-en-place-de-sauvegardes)
@@ -32,28 +32,40 @@ Pour le partitionnement, j’ai fait le choix suivant :
 
 * __Boot__ : 512 Mo
 * __Swap__ : 4096 Mo (~ RAM)
-* __/__ : 80000 Mo (~ 80 Go pour le système)
-* __/data__ : ce qui reste
+* __/__ : 100000 Mo (~ 100 Go pour le système et les logs)
+* __/data__ : ce qui reste (~ 850 Go)
 
-(Si votre serveur sera pour du web avec gestion de fichiers d’utilisateurs, il est conseillé d’avoir une partition `tmp` dédiée.)
+(Habituellement, la partition `data` est nommée `srv` pour _services_. Si on prévoit un serveur web avec gestion de fichiers d’utilisateurs, il est conseillé d’avoir une partition `tmp` dédiée.)
 
-On choisit ensuite le nom de la machine, les mots de passe (que l’on changera à notre première connexion !), et on attend que les opérations soient terminées pour la suite.
+On choisit ensuite le nom de la machine, les mots de passe (que l’on changera à notre première connexion !), et on attend que les opérations soient terminées pour la suite.
 
 _On peut en profiter pour activer le backup FTP que l’on configurera plus tard._
 
 # Première connexion
 
-Une fois que le serveur est prêt, on va pouvoir s’y connecter en SSH, sur le port 22.  
+Une fois que le serveur est prêt, on va pouvoir s’y connecter en SSH, sur le port 22 :
+
+    ssh username@server.domain.tld
 
 ## Mots de passe
 
-On change les mots de passe !
+On commence par changer les mots de passe !
 
-	passwd username
+Pour l’utilisateur courant :
+
+	passwd
+
+Ensuite on se connecte en tant que `root`, et on change aussi son mot de passe :
+
+    su -
+	passwd
+
+Si on veut modifier le mot de passe d’un autre utilisateur, on peut utiliser `passwd username`.
+
 
 ## Service SSH
 
-On se rend dans le dossier `/etc/ssh`, et on va créer le fichier `sshd_config./servername.conf` qui va permettre de configurer et sécuriser le service SSH, avec les options suivantes :
+On se rend dans le dossier `/etc/ssh`, et on va créer le fichier `sshd_config.d/servername.conf` qui va permettre de configurer et sécuriser le service SSH, avec les options suivantes :
 
 	Port 1024
 
@@ -63,6 +75,7 @@ On se rend dans le dossier `/etc/ssh`, et on va créer le fichier `sshd_config./
 	MaxAuthTries 3
 	
 	AllowUsers username
+	#PasswordAuthentication no
 
 	X11Forwarding no
 	PrintMotd no
@@ -82,9 +95,37 @@ Pour que les paramètres soient pris en compte :
 
 On peut se déconnecter pour se reconnecter avec les nouveaux paramètres, et on est prêt pour la suite.
 
+### Connexion par clé publique
+
+Plutôt que de se connecter par mot de passe, on peut se connecter par clé publique.
+
+Pour cela, sur son ordinateur, on génère sa paire de clés :
+
+    ssh-keygen -t ed25519 -C "domain.tld" -f ~/.ssh/id_ed25519_domain
+
+On crée le fichier `~/.ssh/config` pour indiquer de se connecter en SSH avec cette clé créée :
+
+    Host server.domain.tld
+	  Port 1024
+	  User username
+      IdentityFile ~/.ssh/id_ed25519_domain
+	  AddKeysToAgent yes
+      UseKeychain yes
+
+Pour éviter de devoir indiquer la phrase secrète à chaque fois, on peut l’ajouter dans le trousseau d’accès du Mac :
+
+    ssh-add --apple-use-keychain ~/.ssh/id_ed25519_domain
+
+Ensuite, sur le serveur, on ajouter la clé publique `id_ed25519_domain.pub` dans le fichier `.ssh/authorized_keys` du répertoire utilisateur.
+
+On peut aussi décommenter dans `/etc/sshd_config.d/servername.conf` la ligne suivante pour empêcher les connexions avec mot de passe :
+
+    PasswordAuthentication no
+
+
 ## Terminal
 
-On peut ajouter dans le fichier `~/.bashrc` de l'utilisateur les alias suivants pour les commandes usuelles :
+On peut ajouter dans le fichier `~/.bashrc` de l’utilisateur `root` les alias suivants pour les commandes usuelles :
 
 	alias ls='ls $LS_OPTIONS -F --color=auto'
 	alias ll='ls $LS_OPTIONS -AlFh --color=auto'
@@ -222,20 +263,19 @@ On peut ensuite configurer msmtp via le fichier `/etc/msmtprc` à créer. Ici on
 
 	defaults
 	logfile /var/log/msmtp.log
-	aliases /etc/aliases
-	auth on
-	tls on
 	
-	account servername@gmail.com
+	account default
 	host smtp.gmail.com
 	port 587
-	tls_starttls on
+	auth on
 	user servername@gmail.com
 	password complex_password
 	from servername@gmail.com
-	domain servername
-	
-	account default : server@gmail.com
+	auto_from on
+	maildomain servername
+
+	tls on
+	tls_starttls on
 
 Pour vérifier que la configuration est bonne, il suffit de s’envoyer un e-mail :
 
@@ -245,7 +285,7 @@ Pour vérifier que la configuration est bonne, il suffit de s’envoyer un e-mai
 
 Penser à modifier le fichier `/etc/passwd` pour mettre à jour le nom des utilisateurs avec quelque chose de plus friendly :
 
-	root:x:0:0:Servername:/root:/bin/bash
+	root:x:0:0:root (server):/root:/bin/bash
 
 Et ajouter un alias dans `/root/.bashrc` pour forcer le nom de l’expéditeur :
 
@@ -300,26 +340,6 @@ On relance pour prendre en compte les modifications :
 
 _Pour voir les statuts, utiliser la commande `fail2ban-client status`_.
 
-### logwatch
-
-Pour recevoir par e-mail un état journalier de notre serveur, on peut installer logwatch :
-
-	apt install logwatch
-	mkdir /var/cache/logwatch
-	cp /usr/share/logwatch/default.conf/logwatch.conf /etc/logwatch/conf/
-
-On peut maintenant le modifier :
-
-	Output = mail
-	MailTo = you@domain.tld
-	MailFrom = Servername <servername@domain.tld>
-
-Pour tester et recevoir le premier rapport
-
-	logwatch --mail you@domain.tld
-
-Pour modifier le format de la rubrique HTTP et afficher les _vhosts_ Apache, il est nécessaire de suivre ce [tutorial](http://romain.novalan.fr/wiki/LogWatch_Apache_/_HTTP_avec_Virtual_Host).
-
 ### apticron
 
 Pour recevoir un e-mail dès que des mises à jour sont disponibles :
@@ -333,27 +353,24 @@ On configure le service grâce au fichier `/etc/apticron/apticron.conf` :
 
 ### unattended-upgrades
 
-Pour que les mises à jour critiques soient automatiquement faites (voir [cet article](https://wiki.debian.org/UnattendedUpgrades)), on installe :
+Pour que les mises à jour critiques soient automatiquement faites (voir [cet article](https://wiki.debian.org/UnattendedUpgrades)), on installe :
 
 	apt install unattended-upgrades apt-listchanges
 
 On modifie le fichier `/etc/apt/apt.conf.d/50unattended-upgrades` de configuration (décommanter et compléter) :
 
+	Unattended-Upgrade::Mail "you@domain.tld";
+	Unattended-Upgrade::MailReport "on-change";
 	Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 	Unattended-Upgrade::Remove-Unused-Dependencies "true";
-	Unattended-Upgrade::Mail "you@domain.tld";
 
 On lance la configuration avec 
 
 	dpkg-reconfigure -plow unattended-upgrades
 
-Et on termine par modifier le fichier généré `/etc/apt/apt.conf.d/20auto-upgrades` en ajoutant :
+Et on termine par modifier le fichier généré `/etc/apt/apt.conf.d/20auto-upgrades` en ajoutant à la fin :
 
 	APT::Periodic::AutocleanInterval "31";
-
-## Apache 2 et PHP 8
-
-Reportez-vous au document [Installation et configuration d’Apache 2 et PHP 8](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
 
 ## Git
 
@@ -375,6 +392,9 @@ Comme on a installé Apache, on va faire en sorte que le répertoire `.git` ne s
 		Satisfy all
 	</DirectoryMatch>
 
+## Apache 2 et PHP 8
+
+Reportez-vous au document [Installation et configuration d’Apache 2 et PHP 8](https://github.com/Devenet/Memo/blob/master/apache.md) pour installer et configurer votre serveur web.  
 
 ## Munin
 
@@ -759,3 +779,4 @@ On a maintenant le fichier en local, qu’on extrait et que l’on peut parcouri
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
+
