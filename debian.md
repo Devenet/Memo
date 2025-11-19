@@ -9,12 +9,12 @@ Ce guide a été effectué et mis à jour pour une installation sur une Dedibox.
   * [Service SSH](#service-ssh)
   * [Terminal](#terminal)
 * [Configuration et installation de paquets](#configuration-et-installation-de-paquets)
-  * [Hostname](#hostname)
+  * [Hostname](#hostname) : [Activer IPv6](#activer-ipv6), [IP externe dynamique](#ip-externe-dynamique)
   * [SSH](#ssh) : [Notification de connexion](#notification-de-connexion), [Message of the Day](#message-of-the-day)
   * [Utilitaires](#utilitaires) : _[msmtp](#msmtp), [fail2ban](#fail2ban), [apticron](#apticron), [unattended-upgrades](#unattended-upgrades)_
   * [Git](#git)
   * [Apache2 et PHP 8](#apache-2-et-php-8) (&rarr; [guide](https://github.com/Devenet/Memo/blob/master/apache.md))
-  * [Munin](#munin): _[Munin node](#munin-node), [Munin server](#munin-server)_
+  * [Munin](#munin) : _[Munin node](#munin-node), [Munin server](#munin-server)_
   * [Nextcloud](#nextcloud)
 * [Mise en place de sauvegardes](#mise-en-place-de-sauvegardes)
   * [Sauvegardes incrémentales locales](#sauvegardes-incrémentales-locales)
@@ -174,6 +174,28 @@ On va modifier le fichier `/etc/hosts` pour y ajouter notre nom de domaine compl
 On peut vérifier que c’est correct avec `hostname` puis `hostname -f`.
 
 _Si l’on voulait obtenir une IP statique au lieu de celle obtenue par DHPC, il faudrait modifier le fichier `/etc/network/interfaces`, voir [Attribution d’une IP fixe](https://github.com/Devenet/Memo/blob/master/raspberrypi.md#attribution-ip-fixe)._
+
+### Activer IPv6
+
+Dans le cas d’une Dedibox, il faut d’abord configurer un préfixe IPv6 dans la console d’administration.  
+
+Ensuite, on installe le paquet `isc-dhcp-client`.
+
+On crée le fichier `/etc/dhcp/dhclient6.conf` avec le contenu suivant (en remplaçant `<DUID>` par celui fourni dans la console) : 
+
+    interface "enp1s0" {
+        send dhcp6.client-id <DUID>;
+    }
+
+On peut ajouter à la fin du fichier `/etc/network/interfaces` les instructions suivantes (en remplaçant `<IPv6>` par celle choisie à partir du préfixe) :
+
+    # IPv6
+    auto enp1s0
+    iface enp1s0 inet6 static
+        address <IPv6>
+        netmask 56
+        pre-up dhclient -cf /etc/dhcp/dhclient6.conf -6 -P enp1s0
+        pre-down dhclient -x -pf /var/run/dhclient6.pid
 
 ### IP externe dynamique
 
@@ -779,4 +801,5 @@ On a maintenant le fichier en local, qu’on extrait et que l’on peut parcouri
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
+
 
