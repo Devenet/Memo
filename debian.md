@@ -201,8 +201,7 @@ On peut ajouter à la fin du fichier `/etc/network/interfaces` les instructions 
 
 Si votre serveur est hebergé par un professionnel ou que vous avez une IP fixe, il suffit de modifier vos entrées DNS pour que `server.domain.tld` pointe vers l’IP publique de votre serveur, et vous pouvez passer à la suite.  
 
-Dans le cas où l’on ne possède qu’une adresse IP dynamique, il va falloir ruser en mettant à jour notre enregistrement DNS à chaque fois que l’IP change.  
-On a différentes manières de le faire, comme utiliser le service externe DynHost d’OVH.  
+Dans le cas où l’on ne possède qu’une adresse IP dynamique, il va falloir ruser en mettant à jour notre enregistrement DNS à chaque fois que l’IP change. On a différentes manières de le faire, comme utiliser le service externe DynHost d’OVH.  
 
 On installe `ddclient` qui va permettre de mettre à jour automatiquement notre IP sur l’entrée DNS correspondante si elle a changé depuis la dernière fois :
 
@@ -232,8 +231,7 @@ et on va changer et ajouter certains paramètres :
 
 On redémarre le service avec `service ddclient restart`.
 
-Pour vérifier que la mise à jour s’est bien effectuée, on peut visualiser le fichier `/var/cache/ddclient/ddclient.cache` et s’assurer que notre domaine pointe bien vers notre dernière IP.  
-Sinon, on peut aussi lancer le service en mode debug avec `ddclient -daemon=0 -debug -verbose -noquiet`.
+Pour vérifier que la mise à jour s’est bien effectuée, on peut visualiser le fichier `/var/cache/ddclient/ddclient.cache` et s’assurer que notre domaine pointe bien vers notre dernière IP. Sinon, on peut aussi lancer le service en mode debug avec `ddclient -daemon=0 -debug -verbose -noquiet`.
 
 ## SSH
 
@@ -270,7 +268,6 @@ _Pour que l’envoi d’e-mail fonctionne, on configurera `msmtp` dans [la suite
 Lors de la connexion (locale ou SSH) un message de bienvenue accueille l’utilisateur lors d’une connexion en ligne de commande.
 
 Pour personnaliser ce message, il suffit de modifier ou créer le fichier `/etc/motd`.
-
 
 
 ## Utilitaires
@@ -337,7 +334,9 @@ J’ai choisi que la boîte e-mail du serveur ne servirait qu’à envoyer des e
 
 Notre serveur étant connecté au web, on installe fail2ban qui permet de bannir une IP pour une durée en fonction de règles prédéfinies (tentatives infructeuses de connexion SSH, …) :
 
-	 apt install fail2ban
+	apt install fail2ban
+	systemctl enable fail2ban
+	systemctl start fail2ban
 
 Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2ban/jail.local` et c’est ce dernier qu’on va modifier :
 
@@ -353,14 +352,19 @@ Pour le configurer, on copie le fichier `/etc/fail2ban/jail.conf` en `/etc/fail2
 	mta = mail
 	action = %(action_mwl)s
 
-Ensuite, activer ou modifier les jails selon vos préférences. D’une manière générale n’hésitez pas à abaisser le nombre d’essais avant bannissement.  
-Pour SSH, n’oubliez pas d’ajouter le nouveau port `port = ssh,XYZ`.
+Ensuite, activer ou modifier les jails selon vos préférences. D’une manière générale n’hésitez pas à abaisser le nombre d’essais avant bannissement. Pour SSH, n’oubliez pas d’ajouter le nouveau port `port = ssh,XYZ`.
 
 On relance pour prendre en compte les modifications :
 
 	fail2ban-client reload
 
 _Pour voir les statuts, utiliser la commande `fail2ban-client status`_.
+
+Pour s’assurer que les règles `iptables` sont bien rechargées à chaque démarrage, on installe `apt install iptables-persistent`.
+
+En cas d’erreurs, on peut trouver les derniers logs avec :
+
+    fail2ban-server -f -s /var/run/fail2ban/fail2ban.sock
 
 ### apticron
 
@@ -801,5 +805,6 @@ On a maintenant le fichier en local, qu’on extrait et que l’on peut parcouri
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
+
 
 
