@@ -5,13 +5,11 @@ Ce guide permet d’installer et configurer un serveur Apache avec PHP pour serv
 * [Installation](#installation)
 * [Configuration](#configuration)
 	* [Sécurisation](#sécurisation)
-	* [Format des logs](#format-des-logs)
-	* [Support des fichiers RSS](#support-des-fichiers-rss)
-	* [Images favicon](#images-favicon)
+	* [Favicon](#favicon)
 	* [Modules](#modules)
 	* [Envoi d'e-mails](#envoi-de-mails)
 	* [HTTP2 et UTF-8](#http2-et-utf-8)
-	* [PHP7 FPM](php7-fpm)
+	* [PHP-FPM](php-fpm)
 * [Virual hosts](#virtual-hosts)
 	* [Default vhost](#default-vhost)
 	* [Local vhost](#local-vhost)
@@ -37,7 +35,7 @@ Il suffit d’installer les paquages suivants :
 
 	apt install apache2 php php-common php-cli php-fpm php-json php-pdo php-sqlite3 php-zip php-gd php-mbstring php-curl php-xml memcached php-memcached php-imagick imagemagick
 
-On peut aussi installer d’autres extensions selon les besoins, par exemple `php-pear`, `php-bcmath`.
+On peut aussi installer d’autres extensions selon les besoins, par exemple `php-intl` (pour gérer les dates en français, avec [IntlDateFormatter](https://www.php.net/manual/fr/class.intldateformatter.php)), `php-pear`, `php-bcmath`.
 
 Pour utiliser PHP avec Apache (ce qui est un peu le but), on installe :
 
@@ -48,7 +46,7 @@ Pour utiliser PHP avec Apache (ce qui est un peu le but), on installe :
 
 ### Sécurisation
 
-Dans le fichier `/etc/apache2/conf-available/apache2.conf`, on diminue la valeur par défaut du timeout :
+Dans le fichier `/etc/apache2/apache2.conf`, on diminue la valeur par défaut du timeout :
 
 	Timeout 60
 
@@ -58,7 +56,7 @@ Dans le fichier `/etc/apache2/conf-available/security.conf`, on vérifie que les
 	ServerSignature Off
 	TraceEnable Off
 
-On décommente (début du fichier normalement) et ajoute le paramétrage pour désactiver le listage des dossiers sans fichier d’index :
+Pour désactiver le listage des dossiers par défaut et l’accès, on ajoute cette inscrution au début du fichier :
 
 	<Directory />
 		Options -Indexes
@@ -66,41 +64,21 @@ On décommente (début du fichier normalement) et ajoute le paramétrage pour d�
 		Require all denied
 	</Directory>
 
+
 #### Git et SVN
 
 S’il vous arrive de cloner un dépôt et de l’utiliser, il faut veuiller à ce que les répertoires `.git` ne soient pas accessibles.  
-Pour cela, on modifie le fichier précédent `security.conf`en décommantant la partie `svn` puis en ajoutant une directive pour la partie `git` :
+Pour cela, on modifie le fichier précédent `security.conf`en décommantant la partie `git` et `svn` :
 
-	<DirectoryMatch "/\.svn">
-	       Require all denied
-	</DirectoryMatch>
-	<DirectoryMatch "/\.git">
-	       Require all denied
-	</DirectoryMatch>
+	RedirectMatch 404 /\.git
+	RedirectMatch 404 /\.svn
 
-Si vous stockez des infos SSH de déploiement dans `/var/www/.ssh` par exemple, il faut aussi ajouter :
+Si vous stockez des infos SSH de déploiement dans `/var/www/.ssh` par exemple, il faut aussi ajouter la ligne :
 
-	<DirectoryMatch "/\.ssh">
-	       Require all denied
-	</DirectoryMatch>
+	RedirectMatch 404 /\.ssh
 
-### Format des logs
 
-Comme on va utiliser plusieurs _vhosts_ pour nos sites web, et pour un meilleur affichage dans certains reports (logwatch par exemple), il faut modifier le format de log `vhost_combined` dans le fichier `/etc/apache2/apache2.conf`.
-
-	LogFormat "%V:%p %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" vhost_combined
-
-### Support des fichiers RSS
-
-Pour que les fichiers RSS soient automatiquement reconnus comme des fichiers XML, on crée le fichier `/etc/apache2/conf-available/xml-rss-support.conf` dans lequel on inscrit :
-
-	AddType application/xml .xml .rss
-
-On active la configuration avec :
-
-	a2enconf xml-rss-support.conf
-
-### Images favicon
+### Favicon
 
 Comme les navigateurs essaient toujours d'accéder à `/favicon.ico` et si l'on veut éviter des logs d'erreur pour ça, on peut toujours autoriser l'accès à ce fichier. On crée le fichier `/etc/apache2/conf-available/favicon.conf` qui contient :
 
@@ -116,15 +94,15 @@ On active la configuration avec :
 
 On va activer les modules suivants :
 
-	a2enmod rewrite
-	a2enmod headers
-	a2enmod deflate
-	a2enmod http2
-	a2enmod expires
+	a2enmod rewrite headers deflate http2 expires
 
 On peut aussi en profiter pour modifier le paramètre `DirectoryIndex` (ordre de préférence des fichiers) dans le fichier `/etc/apache2/mods-available/dir.conf` :
 
-	 DirectoryIndex index.html index.htm index.php
+	 DirectoryIndex index.html index.php
+
+Si on ne souhaite pas des pages d’erreur affichées selon la langue du navigateur, on peut désactiver la configuration avec :
+
+	a2disconf localized-error-pages
 
 
 ### Envoi d’e-mails
@@ -137,13 +115,11 @@ Penser à modifier le fichier `/etc/passwd` pour mettre à jour l’utilisateur 
 
 Pour activer HTTP2, il faut :
 
-	a2dismod php8.2
-	a2dismod mpm_prefork
-	a2enmod mpm_event
-	a2enmod http2
+	a2dismod php8.4 mpm_prefork
+	a2enmod mpm_event http2
 	systemctl restart apache2
 	
-Ensuite, on ajoute ces directives dans le fichier `/etc/apache2/conf-available/custom.conf`, ainsi que la configuration des fichiers qui seront servis par défaut en UTF-8 :
+Ensuite, on ajoute ces directives dans le fichier `/etc/apache2/conf-available/http2.conf`, ainsi que la configuration des fichiers qui seront servis par défaut en UTF-8 :
 
 	FileETag None
 
@@ -151,16 +127,25 @@ Ensuite, on ajoute ces directives dans le fichier `/etc/apache2/conf-available/c
 		Protocols h2 http/1.1
 	</IfModule>
 	
-	AddCharset UTF-8 .php .html .htm .css .js .xml .rss .json .svg .txt .md
+	AddCharset UTF-8 .php .html .css .js .xml .rss .json .svg .txt .md
 
-On l’active avec `a2enconf custom` et on relance Apache avec `systemctl reload apache2`.
+On l’active avec `a2enconf http2` et on relance Apache avec `systemctl reload apache2`.
 
-### PHP7 FPM
+_On pourrait aussi activer par défaut en UTF-8 pour tous les fichiers servis : il faudrait alors décommenter la ligne dans le fichier `conf-available/charset.conf`._
+
+### PHP-FPM
+
+Par défaut, PHP-FPM n’est pas activé. On le configure avec :
+
+	a2enmod proxy_fcgi setenvif
+	a2enconf php8.4-fpm
+
+Et on applique les changements avec `systemctl restart apache2`.
 
 On paramètre le module PHP-FPM pour n’être utilisé que si le fichier PHP à servir existe bien.  
 Cela évite des erreurs "File not found" ou "AH01071: Got error 'Primary script unknown'".
 
-On modifie le fichier `/etc/apache2/conf-available/php7.4-fpm.conf`
+On modifie le fichier `/etc/apache2/conf-available/php8.4-fpm.conf` en commentant la 1re partie, puis décommentant la 2e :
 
 	# <FilesMatch ".+\.ph(ar|p|tml)$">
 	#	SetHandler "proxy:unix:/run/php/php7.4-fpm.sock|fcgi://localhost"
