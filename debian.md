@@ -638,9 +638,22 @@ Si on a besoin de lancer une commande Nextcloud depuis un autre utilisateur, on 
 
 On peut aussi activer le cache pour améliorer les performances :
 
-	apt install php-apcu php-redis
+	apt install php-apcu redis-server php-redis
 
-Et on modifier le fichier `config.php` : 
+On modifie la configuration de Redis dans le `/etc/redis/redis.conf` pour activer uniquement les sockets :
+
+	port 0 # par défaut 6379
+	unixsocket /run/redis/redis-server.sock
+	unixsocketperm 770 # par défaut 700
+
+On ajoute l’utilisateur `www-data` au groupe `redis`, puis on relance le service redis :
+
+	usermod -a -G redis www-data
+	systemctl restart redis
+	systemctl restart apache2
+	
+
+On peut mettre à jour le fichier de configurer de Nextcloud `config.php` : 
 
 	'memcache.local' => '\\OC\\Memcache\\APCu',
 	'memcache.locking' => '\\OC\\Memcache\\Redis',
@@ -650,7 +663,7 @@ Et on modifier le fichier `config.php` :
 		'timeout' => 0.0,
 	),
 
-Dans ce cas, il faut modifier le _crontab_ précédemment ajouté :
+Il faut aussi modifier le _crontab_ précédemment ajouté :
 
 	*/15  *  *  *  * php -f /data/www/nextcloud/cron.php --define apc.enable_cli=1
 
@@ -674,9 +687,11 @@ Si on a l’avertissement suivant :
 > Verrouillage de fichiers transactionnels
 > La base de données est actuellement utilisée pour les verrous. Afin d'améliorer les performances, veuillez si possible configurer un cache mémoire.
 
-On commence par lancer le scan complet des fichiers : 
+On peut commencer par lancer le scan complet des fichiers : 
 
 	su - www-data -s /bin/bash -c '/usr/bin/php /data/www/nextcloud/occ files:scan --all'
+
+Sinon, c’est que le cache a mal été configuré précédemment.
 
 ***
 
@@ -867,6 +882,7 @@ On a maintenant le fichier en local, qu’on extrait et que l’on peut parcouri
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
+
 
 
 
