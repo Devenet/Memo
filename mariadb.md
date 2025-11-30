@@ -12,8 +12,6 @@ On vérifie que ton système est à jour (`apt update && apt upgrade`), puis on 
     mariadb --version
     systemctl status mariadb
 
-## Sécurisation
-
 On sécurise ensuite immédiatement notre serveur SQL avec la commande :
 
     mariadb-secure-installation
@@ -61,6 +59,12 @@ Et ensuite créer un·e utilisateur·trice ayant tous les droits uniquement sur 
     create user 'nextcloud'@'localhost' identified by '<mot de passe>';
     grant all privileges on nextcloud.* to 'nextcloud'@'localhost';
     flush privileges;
+
+## Configuration pour PHP
+
+On ajouter le module PHP nécessaire, si pas déjà installé :
+
+    apt install php-mysql
 
 ---
 
