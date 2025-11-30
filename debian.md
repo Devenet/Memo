@@ -607,7 +607,6 @@ Après avoir configuré les utilisateurs et la configuration via l’application
 	'dbname' => 'nextcloud',
 	'dbuser' => 'nextcloud',
 	'dbpassword' => '<mot de passe>',
-	'installed' => false,
 	'default_language' => 'fr',
 	'default_phone_region' => 'FR',
 	'default_timezone' => 'Europe/Paris',
@@ -621,23 +620,63 @@ Après avoir configuré les utilisateurs et la configuration via l’application
 	'mail_smtpname' => 'servername@domain.tld',
 	'mail_smtppassword' => '<mot de passe>',
 	'mail_sendmailmode' => 'smtp',
+	'overwrite.cli.url' => 'https://cloud.domain.tld',
 	'htaccess.RewriteBase' => '/',
-	'connectivity_check_domains' => [
-		'https://www.nextcloud.com',
-		'https://www.eff.org',
-	],
 	'loglevel' => 2,
 	'logtimezone' => 'Europe/Paris',
 	'maintenance' => false,
-	'memcache.local' => '\\OC\\Memcache\\Memcache',
+	'maintenance_window_start' => 1,
 	'mysql.utf8mb4' => true,
 	'forbidden_filenames' => []
 
 
 Si on a besoin de lancer une commande Nextcloud depuis un autre utilisateur, on peut utiliser :
 
-        su - www-data -s /bin/bash -c '/usr/bin/php /data/www/nextcloud/occ maintenance:repair --include-expensive'
+	su - www-data -s /bin/bash -c '/usr/bin/php /data/www/nextcloud/occ maintenance:repair --include-expensive'
 
+### Activation du cache
+
+On peut aussi activer le cache pour améliorer les performances :
+
+	apt install php-apcu php-redis
+
+Et on modifier le fichier `config.php` : 
+
+	'memcache.local' => '\\OC\\Memcache\\APCu',
+	'memcache.locking' => '\\OC\\Memcache\\Redis',
+	'redis' => array(
+		'host' => '/run/redis/redis-server.sock',
+		'port' => 0,
+		'timeout' => 0.0,
+	),
+
+Dans ce cas, il faut modifier le _crontab_ précédemment ajouté :
+
+	*/15  *  *  *  * php -f /data/www/nextcloud/cron.php --define apc.enable_cli=1
+
+### Avertissements
+
+Si on a l’avertissement suivant :
+
+> PHP opcache
+> Le module PHP OPcache n'est pas correctement configuré. Le tampon mémoire des chaînes internes OPcache est presque plein. Pour vous assurer que les chaînes répétitives peuvent être mise en cache, il est recommandé de définir la variable "opcache.interned_strings_buffer" de votre fichier de configuration PHP à une valeur supérieure à "8".
+
+Il faut modifier le fichier de configuration de PHP (par exemple dans `/etc/php/8.4/fpm/php.ini`) :
+
+	opcache.enable=1
+	opcache.enable_cli=1
+	opcache.interned_strings_buffer=16
+
+Et on recharge la configuration avec `service php8.4-fpm reload`.
+
+Si on a l’avertissement suivant :
+
+> Verrouillage de fichiers transactionnels
+> La base de données est actuellement utilisée pour les verrous. Afin d'améliorer les performances, veuillez si possible configurer un cache mémoire.
+
+On commence par lancer le scan complet des fichiers : 
+
+	su - www-data -s /bin/bash -c '/usr/bin/php /data/www/nextcloud/occ files:scan --all'
 
 ***
 
@@ -828,6 +867,7 @@ On a maintenant le fichier en local, qu’on extrait et que l’on peut parcouri
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
+
 
 
 
