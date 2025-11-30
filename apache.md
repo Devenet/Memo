@@ -166,9 +166,6 @@ Il suffit de créer un fichier de configuration dans `/etc/apache2/sites-availab
 	a2ensite nom_vhost_file.conf
 	a2dissite nom_vhost_file.conf
 
-Il faut aussi s’assurer que dans `/etc/apache2/ports.conf` on a bien la directive :
-
-	NameVirtualHost *:80
 
 ### Default vhost
 
@@ -177,7 +174,7 @@ On va modifier le vhost par défaut. Comme on écoute sur le port 80 quelque soi
 On désactive le vhost par défaut avec `a2endissite 000-default` puis on modifie le fichier `/etc/apache2/sites-available/000_default.conf`.  
 
 	<VirtualHost _default_:80>
-		ServerName default.local
+		ServerName default
 		DocumentRoot /dev/null
 
 		ErrorLog ${APACHE_LOG_DIR}/error.log
@@ -187,7 +184,7 @@ On désactive le vhost par défaut avec `a2endissite 000-default` puis on modifi
 
 	<IfModule mod_ssl.c>
 	<VirtualHost _default_:443>
-		ServerName default.local
+		ServerName default
 		DocumentRoot /dev/null
 
 		SSLEngine on
@@ -212,7 +209,7 @@ On va ensuite créer le vhost « localhost » pour qu'Apache accepte les requêt
 		ServerAlias 127.0.0.1
 		ServerAdmin you@domain.tld
 		
-		DocumentRoot /var/www
+		DocumentRoot /var/www/html
 
 		ErrorLog ${APACHE_LOG_DIR}/error.log
 		LogLevel warn
@@ -234,7 +231,7 @@ Une fois que les deux précédents _vhosts_ sont configurés, on peut maintenant
 		</Directory>
 		<Directory /data/www/domain.tld/beta>
 			Options +Indexes
-			Include /data/apache/conf/auth_server.conf
+			Include /data/apache-credentials/authentification.conf
 			Require group developers
 		</Directory>
 
@@ -288,12 +285,12 @@ Il faut activer le module suivant pour supporter l’authentification par groupe
 
 	a2enmod authz_groupfile
 
-Dans la configuration du _vhost_ précédent, on a inclus le fichier de configuration `auth_server.conf` (permet de l’inclure depuis plusieurs _vhosts_) :
+Dans la configuration du _vhost_ précédent, on a inclus le fichier de configuration `authentification.conf` (permet de l’inclure depuis plusieurs _vhosts_) :
 
 		AuthType Basic
 		AuthName "Beta area"
-		AuthUserFile /data/apache/credentials/users
-		AuthGroupFile /data/apache/credentials/groups
+		AuthUserFile /data/apache-credentials/users
+		AuthGroupFile /data/apache-credentials/groups
 
 Pour créer un utilisateur et l’ajouter à un fichier non encore existant :
 
@@ -319,9 +316,9 @@ On suppose que l’on a déjà les certificats qui seront utilisés, hormis le c
 Ce certificat est utilisé pour le _vhost_ SSL par « défaut ».  
 Il suffit de taper la commande suivante et d’y entrer les informations nécessaires (dans mon cas, comme je souhaite donner le moins d’informations, je ne renseigne que l’organisation, pour les autres champs j’indique `.` pour laisser vide) :
 
-	openssl req -x509  -newkey rsa:2048 -nodes -days 365 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem
+	openssl req -x509  -newkey rsa:4096 -nodes -days 365 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem
 
-_On peut aussi changer la durée de la validité du certificat (`-days 365`) voire diminuer ou augmenter la taille du chiffrement de la clef (`rsa:4096`)._
+_On peut aussi changer la durée de la validité du certificat (`-days 365`) voire diminuer ou augmenter la taille du chiffrement de la clef (`rsa:2048`)._
 
 Pour éviter que n’importe qui puisse aller voir nos clefs privées, on fait un `chmod 400 ssl-cert-*.key` sur chaque de nos clefs privées !  
 On peut aussi faire un `chown :ssl-cert ssl-cert-*.key` pour leur attribuer comme groupe « ssl-cert ».
