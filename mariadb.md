@@ -20,13 +20,13 @@ On sécurise ensuite immédiatement notre serveur SQL avec la commande :
 
 où l'on va successivement :
 
-1. `Enter current password for root (enter for none)` -> mot de passe du compte `root` de MariaDB.
-2. `Switch to unix_socket authentication`-> répondre `n` (comme on a fait l’étape 1).
-3. `Change the root password?`-> répondre `n` (comme on a fait l’étape 1).
-4. `Remove anonymous users?`-> `Y` pour désactiver les utilisateurs anonymes.
-5. `Disallow root login remotely?` -> `Y` pour que la connexion de l’utilisateur `root` ne soit acceptée que depuis la machine elle-même.
-6. `Remove test database and access to it?` -> `Y` pour supprimer la base de test présente.
-7. `Reload privilege tables now?` -> `Y` pour appliquer les paramètres que l’on vient de configurer.
+1. `Enter current password for root (enter for none)` → mot de passe du compte `root` de MariaDB.
+2. `Switch to unix_socket authentication` → répondre `n` (comme on a fait l’étape 1).
+3. `Change the root password?` → répondre `n` (comme on a fait l’étape 1).
+4. `Remove anonymous users?` → `Y` pour désactiver les utilisateurs anonymes.
+5. `Disallow root login remotely?` → `Y` pour que la connexion de l’utilisateur `root` ne soit acceptée que depuis la machine elle-même.
+6. `Remove test database and access to it?` → `Y` pour supprimer la base de test présente.
+7. `Reload privilege tables now?` → `Y` pour appliquer les paramètres que l’on vient de configurer.
 
 
 ## Ajout de bases de données
