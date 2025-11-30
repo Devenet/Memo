@@ -485,6 +485,8 @@ La configuration se fait dans `/etc/munin/munin.conf` (on commente la partie «�
     	use_node_name yes
     	contacts you
 
+On pense aussi à créer les deux répertoires `/data/db/munin` et `/data/www/munin` et on change l’utilisateur avec `chmod -R munin /data/db/munin` et `chmod -R munin /data/www/munin`.
+
 Par défaut, Munin ajoute une configuration Apache dans `/etc/apache2/conf-available/munin.conf` et l’active (basée sur le ficher `/etc/munin/apache24/conf`). Comme elle ne nous est pas nécessaire, on la désactive complètement :
 
     a2disconf munin
@@ -529,6 +531,10 @@ Il suffit de modifier le fichier `/usr/bin/munin-cron` en :
 	fi
 
 Ici, on ne génère le HTML et les graphes que toutes les `30` minutes.
+
+Si on veut tester, on peut lancer manuellement le processus avec 
+
+	su - munin --shell=/bin/bash -c '/usr/bin/munin-cron'
 
 #### Graphes récapitulatifs
 
@@ -882,6 +888,7 @@ On a maintenant le fichier en local, qu’on extrait et que l’on peut parcouri
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
+
 
 
 
