@@ -1,4 +1,4 @@
-# Installation et configuration d’un serveur sur Debian
+# Installation et configuration d’un serveur Debian
 
 Ce guide a été effectué et mis à jour pour une installation sur une Dedibox. Cependant, à part la première partie à adapter, le reste est valable quelque soit le serveur.
 
@@ -441,7 +441,7 @@ Il faut regarder du côté de `/etc/munin/munin-node.conf`. On vérifie qu’on 
 	allow ^127\.0\.0\.1$
 	allow ^::1$
 
-Pour le cas d’un nœud de notre réseau, il faudra insérer l’IP du serveur :
+Pour le cas d’un nœud de notre réseau, il faudra insérer l’IP du serveur (par exemple 172.16.0.42) :
 
 	allow ^172\.16\.0\.42$
 
@@ -453,18 +453,20 @@ _Néanmoins, celle solution permet à n’importe qui connaissant votre IP de de
 
 #### Plugins
 
-La documentation disponible sur le site francophone d’Ubuntu est assez complète : [doc.ubuntu-fr.org/munin](http://doc.ubuntu-fr.org/munin#munin-node_le_demon_sur_les_noeuds).
+La documentation disponible sur le site francophone d’Ubuntu est assez complète : [doc.ubuntu-fr.org/munin](https://doc.ubuntu-fr.org/munin#munin-node_le_demon_sur_les_nœuds).
 
 	munin-node-configure --suggest --shell
 	munin-run processes --debug
 	…
-	service munin-node restart
+	systemctl restart munin-node
+
+_Parfois, pour des raisons de performance, je désactive ces plugins suivants : entropy, forks, interrupts, irqstats, netstat, open_files, open_inodes, proc_pri, vmstat._
 
 ### Munin server
 
 #### Configuration
 
-La configuration se fait dans `/etc/munin/munin.conf` :
+La configuration se fait dans `/etc/munin/munin.conf` (on commente la partie « a simple host tree ») :
 
 	dbdir /data/db/munin
 	htmldir /data/www/munin
@@ -483,10 +485,11 @@ La configuration se fait dans `/etc/munin/munin.conf` :
     	use_node_name yes
     	contacts you
 
-On supprime le lien symbolique que Munin a ajouté dans `/etc/apache2/conf-enabled` et `/etc/apache2/conf-available` qui a pour conséquence que chaque vhost Apache suivi de `/munin` affiche Munin :/
+Par défaut, Munin ajoute une configuration Apache dans `/etc/apache2/conf-available/munin.conf` et l’active (basée sur le ficher `/etc/munin/apache24/conf`). Comme elle ne nous est pas nécessaire, on la désactive complètement :
 
-	rm /etc/apache2/conf-enabled/munin.conf
+    a2disconf munin
 	rm /etc/apache2/conf-available/munin.conf
+	systemctl reload apache2
 
 Et on crée un vhost spécifique pour Munin !
 
@@ -547,8 +550,6 @@ Pour cela, il est nécessaire de modifier le fichier de configuration du serveur
         uptime.graph_order myhost=myhost.domain.tld:uptime.uptime other-host=other-host.domain.tld:up
 
         # bandwidth
-        bandwidth.graph_args --base 1000 -l 0
-        bandwidth.cdef 0
         bandwidth.graph_category network
         bandwidth.graph_title Bandwidth
         bandwidth.graph_vlabel bits/sec
@@ -579,8 +580,8 @@ Je ne préfère pas installer Nextcloud depuis le paquet Debian ; on va donc té
 On va installer les fichiers web dans  `/data/www/nextcloud` et les données propres dans `/data/cloud`.
 
 	cd /data/www
-	wget https://download.nextcloud.com/server/releases/nextcloud-XYZ.tar.bz2
-	tar -vxjf nextcloud-XYZ.tar.bz2
+	wget https://download.nextcloud.com/server/releases/latest.tar.bz2
+	tar -xvjf latest.tar.bz2
 
 On installe aussi le support de PHP GD :
 
@@ -598,17 +599,39 @@ Et on peut ajouter la ligne suivante :
 
 	*/15  *  *  *  * php -f /data/www/nextcloud/cron.php
 
-Après avoir configurer les utilisateurs et la configuration via l’application web, on va aller modifier le fichier `/data/www/nextcloud/config/config.php` :
+Après avoir configuré les utilisateurs et la configuration via l’application web, on va aller modifier le fichier `/data/www/nextcloud/config/config.php` (et si besoin, corriger) :
 
-	'asset-pipeline.enabled' => true,
-	'knowledgebaseenabled' => false,
+	'datadirectory' => '/data/cloud',
+	'dbtype' => 'mysql',
+	'dbhost' => '127.0.0.1',
+	'dbname' => 'nextcloud',
+	'dbuser' => 'nextcloud',
+	'dbpassword' => '<mot de passe>',
+	'installed' => false,
 	'default_language' => 'fr',
-	'enable_previews' => false,
-	'loglevel' => '4',
+	'default_phone_region' => 'FR',
+	'default_timezone' => 'Europe/Paris',
+	'knowledgebaseenabled' => false,
 	'mail_domain' => 'domain.tld',
 	'mail_from_address' => 'cloud',
-	'mail_smtpmode' => 'php',
-	'maintenance' => false
+	'mail_smtpmode' => 'smtp',
+	'mail_smtphost' => 'smtp.gmail.com',
+	'mail_smtpport' => 587,
+	'mail_smtpauth' => true,
+	'mail_smtpname' => 'servername@domain.tld',
+	'mail_smtppassword' => '<mot de passe>',
+	'mail_sendmailmode' => 'smtp',
+	'htaccess.RewriteBase' => '/',
+	'connectivity_check_domains' => [
+		'https://www.nextcloud.com',
+		'https://www.eff.org',
+	],
+	'loglevel' => 2,
+	'logtimezone' => 'Europe/Paris',
+	'maintenance' => false,
+	'memcache.local' => '\\OC\\Memcache\\Memcache',
+	'mysql.utf8mb4' => true,
+	'forbidden_filenames' => []
 
 
 Si on a besoin de lancer une commande Nextcloud depuis un autre utilisateur, on peut utiliser :
@@ -805,6 +828,7 @@ On a maintenant le fichier en local, qu’on extrait et que l’on peut parcouri
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
+
 
 
 
