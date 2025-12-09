@@ -153,6 +153,7 @@ Au niveau de l’arborescence, j’ai fait le choix suivant :
 
 	/data
 		/apache-credentials
+		/backup-archives
 		/backups
 		/cloud
 		/db
@@ -707,8 +708,12 @@ Sinon, c’est que le cache a mal été configuré précédemment.
 
 On va sauvegarder localement à intervalles réguliers l’état de nos données à différents moments.
 
+Pour cela, on va installer le paquet `rsnapshot` qui est de nouveau disponible :
 
-Ce paquet [n’étant plus distribué](https://github.com/rsnapshot/rsnapshot/issues/279#issuecomment-944907068) depuis Debian 11 (Bullseye), on ne peut plus faire `apt install rsnapshot`. Heureusement il est encore possible de l’installer manuellement :
+	apt install rsnapshot
+
+
+_Avec Debian 11 (Bullseye), le paquet [n’a plus été disponible](https://github.com/rsnapshot/rsnapshot/issues/279#issuecomment-944907068), et il fallait alors l’installer manuellement :_
 
 	wget https://github.com/rsnapshot/rsnapshot/releases/download/1.4.4/rsnapshot_1.4.4-1_all.deb
 	chown _apt ./rsnapshot_1.4.4-1_all.deb
@@ -723,12 +728,12 @@ On copie le fichier modèle `cp /etc/rsnapshot.conf.default /etc/rsnapshot.conf`
 	
 	cmd_cp		/usr/bin/cp
 
-	retain		a_hourly		12
-	retain		b_daily			7
-	retain		c_weekly		4
+	retain		hourly		6
+	retain		daily		7
+	retain		weekly		4
 
 	# Server
-	backup          /home/                          server/
+	backup		/home/              server/
 	backup		/root/				server/
 	backup		/etc/				server/
 	backup		/usr/local/			server/
@@ -743,8 +748,8 @@ On copie le fichier modèle `cp /etc/rsnapshot.conf.default /etc/rsnapshot.conf`
 	backup		/var/spool/cron/crontabs/	server/
 
 
-* Les intervalles sont à choisir en fonction de ce que vous voulez et de la sécurité des sauvegardes vous souhaitez.
-* Les répertoires à sauvegarder aussi ; dans mon cas je sauvegarde les données présentes sur `/data` et les fichiers de configuration intéressants de `/etc`.
+* Les intervalles sont à choisir en fonction de ce que vous voulez et de la sécurité des sauvegardes vous souhaitez. 
+* Les répertoires à sauvegarder aussi ; dans mon cas je sauvegarde les données présentes sur `/data` (chaque dossier unitairement pour exclure le dossier `/data/backups`) et les fichiers de configuration intéressants de `/etc`.
 * Il est possible de faire exécuter un script avant et après l’exécution de rsnapshot avec `cmd_preexec` ou `cmd_postexec`.
 * Vérifiez bien que ce sont de vraies tabulations qui séparent les données.
 
@@ -752,23 +757,23 @@ On peut ensuite tester notre fichier de configuration et simuler une première i
 
 	rsnapshot configtest
 
-	rsnapshot -t a_hourly > /tmp/rsnap_test
+	rsnapshot -t hourly > /tmp/rsnap_test
 	cat /tmp/rsnap_test | less
 
 ### Automatisation
 
 Il suffit d’ajouter dans le fichier crontab les lignes suivantes (en fonction des intervalles de sauvegarde que vous avez choisi !)
 
-	crontab -u root -e
+	crontab -e
 
-	0 */2 * * *       /usr/bin/rsnapshot a_hourly
-	30 23 * * *       /usr/bin/rsnapshot b_daily
-	00 23 * * 7       /usr/bin/rsnapshot c_weekly
+	0 */4 * * *       /usr/bin/rsnapshot hourly
+	30 23 * * *       /usr/bin/rsnapshot daily
+	00 23 * * 7       /usr/bin/rsnapshot weekly
 
 
 Pour effectuer une sauvergarde locale non programmée, la commande suivante suffit :
 
-	 rsnapshot a_hourly
+	 rsnapshot hourly
 
 Ainsi, on a une sauvegarde locale de l’état de nos données à différents moments. On peut donc récupérer un document dans son état la veille, etc.  
 Seulement ces backups sont stockés localement, on va donc devoir en faire une sauvegarde autre part.
@@ -785,14 +790,12 @@ Le paquet `rsync` ne permet pas directement de sauvegarder sur un FTP, on va don
 
 On peut maintenant modifier la configuration du fichier `/etc/backup-manager.conf` pour coller avec nos souhaits :
 
+	export BM_REPOSITORY_ROOT="/data/backup-archives"
+	
 	export BM_ARCHIVE_TTL="1"
 	export BM_ARCHIVE_NICE_LEVEL="0"
 
 	export BM_TARBALL_DIRECTORIES="/data/backups"
-	
-
-	export BM_MYSQL_SEPARATELY="false"
-	export BM_MYSQL_DBEXCLUDE="information_schema performance_schema"
 
 	export BM_UPLOAD_METHOD="ftp"
 	export BM_UPLOAD_DESTINATION="/backups"
@@ -800,7 +803,7 @@ On peut maintenant modifier la configuration du fichier `/etc/backup-manager.con
 	export BM_UPLOAD_FTP_USER="ftp-user"
 	export BM_UPLOAD_FTP_PASSWORD="ftp-password"
 	export BM_UPLOAD_FTP_HOSTS="ftp-host.domain.tld"
-	export BM_UPLOAD_FTP_TTL="8"
+	export BM_UPLOAD_FTP_TTL="7"
 
 	export BM_BURNING_METHOD="none"
 
@@ -816,7 +819,7 @@ Si on veut sauvegarder sa base de données SQL (en local + export FTP) :
     # On peut aussi n’indiquer que les tables à sauvegarder plutôt que tout comme par défaut
     export BM_MYSQL_DATABASES="__ALL__"
     
-    # Utilisateur créé avec GRANT SHOW DATABASES,SHOW VIEW,SELECT,LOCK TABLES ON *.* TO 'backup-manager'@'localhost' IDENTIFIED BY 'mot de passe'
+    # Utilisateur créé avec la commande SQL « GRANT SHOW DATABASES, SHOW VIEW, SELECT, LOCK TABLES ON *.* TO 'backup-manager'@'localhost' IDENTIFIED BY 'mot de passe'; »
     export BM_MYSQL_ADMINLOGIN="backup-manager"
     export BM_MYSQL_ADMINPASS="mot de passe"
     
@@ -849,7 +852,7 @@ On peut maintenant automatiser ce backup.
 
 Comme pour les sauvegardes locales, on utilise les tâches CRON :
 
-	crontab -u root -e
+	crontab -e
 
 	30 1 * * *	/usr/sbin/backup-manager -v | mail -a "From: Servername <servername@domain.tld" -s "[Backup] Synchronization performed" you@domain.tld
 
@@ -888,9 +891,6 @@ On a maintenant le fichier en local, qu’on extrait et que l’on peut parcouri
 	tar -xvzf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
-
-
-
 
 
 
