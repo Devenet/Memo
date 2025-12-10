@@ -804,6 +804,7 @@ On peut maintenant modifier la configuration du fichier `/etc/backup-manager.con
 	export BM_UPLOAD_FTP_PASSWORD="ftp-password"
 	export BM_UPLOAD_FTP_HOSTS="ftp-host.domain.tld"
 	export BM_UPLOAD_FTP_TTL="7"
+	#export BM_UPLOAD_FTP_DESTINATION=""
 
 	export BM_BURNING_METHOD="none"
 
@@ -833,18 +834,15 @@ Si on veut sauvegarder sa base de données SQL (en local + export FTP) :
     export BM_MYSQL_DBEXCLUDE="information_schema performance_schema"
 
 
-
 On peut ensuite lancer manuellement la copie pour s’assurer que tout se passe bien :
 
 	backup-manager -v
 
-Pour vérifier que notre archive a bien été déposée, on se connecte au FTP
+Pour vérifier que notre archive a bien été déposée, on se connecte au FTP avec `lftp` (qu’on installe si besoin avec `apt install lftp`).
 
-	ftp -n ftp-host.domain.tld
-	ftp> user ftp-user ftp-password
-	ftp> passive
-	ftp> ls
-	ftp> exit
+	lftp -u ftp-user ftp-host.domain.tld
+	lftp:> ls
+	lftp:> exit
 
 On peut maintenant automatiser ce backup.
 
@@ -875,23 +873,17 @@ Si notre disque a crashé, ou si le dossier des sauvegardes locales est inutilis
 
 On s’y connecte et on liste les fichiers disponibles :
 
-	ftp -n ftp-host.domain.tld
-	ftp> user ftp-user ftp-password
-	ftp> passive
-	ftp> ls backups
+	lftp -u ftp-user ftp-host.domain.tld
+	lftp:> cd backups
+	lftp:> ls
 
 Ensuite, il faut rapatrier l’archive qui nous intéresse localement avec
 
-	ftp> cd backups
-	ftp> get nom_du_backup.date.tar.gz
-	ftp> exit
+	lftp:> get nom_du_backup.date.tar.gz
+	lftp:> exit
 
 On a maintenant le fichier en local, qu’on extrait et que l’on peut parcourir pour récupérer le ou les fichiers souhaités :-)
 
-	tar -xvzf nom_du_backup.date.tar.gz
+	tar -xzvf nom_du_backup.date.tar.gz
 
 Même si cette manipulation ne serait à faire qu’en cas de pépin, je vous conseille de la faire au moins une fois au moment de la mise en de la sauvegarde pour vérifier qu’elle fonctionne bien, et si vous pouvez de temps en temps après sa mise en place, pour vérifier que tout fonctionne bien, ou que vous n’avez pas oublié des fichiers à sauvegarder ;-)
-
-
-
-
