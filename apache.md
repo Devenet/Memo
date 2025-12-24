@@ -9,7 +9,8 @@ Ce guide permet d’installer et configurer un serveur Apache avec PHP pour serv
 	* [Modules](#modules)
 	* [Envoi d'e-mails](#envoi-de-mails)
 	* [HTTP2 et UTF-8](#http2-et-utf-8)
-	* [PHP-FPM](php-fpm)
+	* [PHP-FPM](#php-fpm)
+	* [Timezone](#timezone)	
 * [Virual hosts](#virtual-hosts)
 	* [Default vhost](#default-vhost)
 	* [Local vhost](#local-vhost)
@@ -156,6 +157,21 @@ On modifie le fichier `/etc/apache2/conf-available/php8.4-fpm.conf` en commentan
 			SetHandler "proxy:unix:/run/php/php7.4-fpm.sock|fcgi://localhost"
 		</If>
    	</FilesMatch>
+
+### Timezone
+
+Par défaut, PHP utilise le fuseau horaire `UTC`. (On peut vérifier avec `phpinfo()`.)
+
+Si besoin, on peut forcer le fuseau horaire par défaut (qui s’appliquera donc à tous les scripts PHP du serveur) à `Europe/Paris`. On modifie le `/etc/php/8.4/fpm/php.ini`, et on décommente et renseigne la ligne suivante :
+
+	[Date]
+	; Defines the default timezone used by the date functions
+	; https://php.net/date.timezone
+	date.timezone = 'Europe/Paris'
+
+Pour que les modifications soient prises en compte, on recharge le service :
+
+	service php8.4-fpm reload
 
 ## Virtual hosts
 
