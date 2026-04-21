@@ -5,6 +5,7 @@ Ce guide a été effectué et mis à jour pour une installation de Rapbian sur u
 * [Graver Raspbian sur une carte SD](#graver-raspbian-sur-une-carte-sd)
 * [Premier démarrage](#premier-démarrage)
 * [Configuration initiale](#configuration-initiale)
+  	* [Réduire la mémoire graphique](#réduire-la-mémoire-graphique)
 	* [Nom du serveur](#nom-du-serveur)
 	* [Attribution IP fixe](#attribution-ip-fixe)
 	* [Comptes utilisateurs](#comptes-utilisateurs)
@@ -12,9 +13,7 @@ Ce guide a été effectué et mis à jour pour une installation de Rapbian sur u
 	* [Sécurisation de SSH](#sécurisation-de-ssh)
 	* [Prise en compte](#prise-en-compte)
 * [Configuration pour serveur](#configuration-pour-serveur)
-	* [Suppression des paquets](#suppression-des-paquets)
 	* [Mises à jour](#mises-à-jour)
-	* [Paquet rpi-update](#paquet-rpi-update)
 	* [Wake On Lan](#wake-on-lan)
 * [Installation de services](#installation-de-services)
 	* [Plugins Munin](#plugins-munin)
@@ -24,10 +23,23 @@ Ce guide a été effectué et mis à jour pour une installation de Rapbian sur u
 
 # Graver Raspbian sur une carte SD
 
-Mon seul lecteur de carte étant sur un Mac pour le moment, voici les différentes étapes à effectuer pour rendre bootable sa carte SD avec une image de Raspbian.  
+## Raspberry Pi Imager
+
+Le plus simple est de télécharger la dernière version de [Raspberry Pi Imager](https://www.raspberrypi.com/software/). Ce dernier permet de sélectionner le modèle de son Raspberry Pi, la version de l’OS souhaitée, et de l’installer directement sur la carte SD connectée à l’ordinateur.
+
+Dans les options de configuration, on indique le nom d’hôte, on crée l’utilisateur, et on active le serveur SSH pour s’y connecter à distance dès la première installation.
+
+Pour un usage en serveur, la version Raspberry Pi OS Lite est pertinente (sans environnement de bureau).  
+Pour un modèle ancien (par exemple Raspberry Pi 1 B), il faudra sélectionner la version 32 bits.
+
+
+
+## [Déprécié] Ligne de commande
+
+Voici les différentes étapes à effectuer pour rendre bootable sa carte SD avec une image de Raspbian depuis un Mac.  
 La démarche peut-être adaptée pour n'importe quelle distribution (OpenElec, …).
 
-On télécharge d'abord la dernière version de Raspbian, par exemple depuis le site [raspberrypi.org](http://www.raspberrypi.org/downloads/).
+On télécharge d'abord la dernière version de Raspberry Pi OS, par exemple depuis le site [raspberrypi.org]([http://www.raspberrypi.org/downloads/](https://www.raspberrypi.com/software/operating-systems/)).
 
 Ensuite, dans un terminal après avoir obtenu les super-pouvoirs (`sudo su`), on récupère le point de montage de notre carte SD :
 
@@ -49,16 +61,17 @@ Une fois l'opération terminée, on est prêt pour la suite.
 
 # Premier démarrage
 
-Penser à brancher un clavier USB ainsi qu'avoir un écran (ou une TV) avec un port HDMI.
+Après avoir branché en Ethernet et allumé le Raspberry Pi, on attend quelques minutes, puis on peut se connecter en SSH avec l’utilisteur créé précédemment.
 
-Pour se connecter, le nom d’utilisateur est `pi` et le mot de passe par défaut est `raspberry`.  
-Attention, le clavier étant par défaut en Qwerty, il faut taper la lettre `q` pour faire un `a`.
+	ssh pi@hostname
 
-On lance l'écran de configuration avec :
+Si besoin, on peut lancer l’écran de configuration avec :
 
-	sudo su
-	raspi-config
+	sudo raspi-config
+	
+(Cela permet par exemple d’étendre la partition sur toute la carte SD, d’overclocker les performances, etc.)
 
+<!--
 On va d'abord étendre la partition sur toute la carte SD :
 
 	Advenced Options
@@ -101,15 +114,23 @@ Grâce aux options avancées, on va pouvoir entre autre régler la taille de la 
 En cliquant sur `Finish` on arrive sur le bash, et l'on peut redémarrer le RBPi avec `sudo reboot`.
 
 Si on a besoin de revenir sur cet écran, la commande `raspi-config` est là.
+-->
 
 # Configuration initiale
 
-La première chose à faire est de connaître l'adresse IP que le serveur DHCP (box ou autre) lui a attribué.  
-On peut ensuite s'y connecter en SSH :
+Connecté en SSH, on se donne les pleins pouvoirs avec 
 
-	ssh pi@192.168.1.10 -p 22
+	sudo su
 
-On passe en `root` avec la commande `sudo su`.
+## Réduire la mémoire graphique
+
+On utilise notre Raspberry Pi pour un serveur, donc on peut diminuer la mémoire graphique. On modifie le fichier `/boot/firmware/config.txt` pour ajouter à la fin : 
+
+	# Low graphical memory
+	gpu_mem=16
+
+Après un redémarrage, on peut vérifier la bonne prise en compte avec la commande `vcgencmd get_mem gpu`.
+
 
 ## Nom du serveur
 
@@ -120,25 +141,29 @@ On met à jour complètement son hostname (pour avoir un FQDN) ; d'abord dans le
 et dans le fichier `/etc/hostname` :
 
 	server
-
-_Il se peut que le hostname soit plus ou moins correct si vous avez lors du premier démarrage utilisé la fonction pour renommer le RBPi._  
+ 
 Pour vérifier que c'est correct, on utilise les commandes `hostname` puis `hostname -f`.
 
 ## Attribution IP fixe
 
-Ensuite on lui attribue une adresse IP fixe, qui va nous faciliter la tâche. On modifie le fichier `/etc/network/interfaces` pour remplacer la ligne `eth0 inet dhcp` par
+On peut configurer son routeur pour qu’il attribue toujours la même IP à notre Raspberry Pi.
 
-	iface eth0 inet static
-		address 192.168.1.100
-		netmask 255.255.255.0
-		#network 192.168.1.0
-		#broadcast 192.168.1.255
-		gateway 192.168.1.1
+Sinon, on peut assigner une IP fixe directement sur le Raspberry Pi, en adaptant selon la configuration de votre réseau : 
 
-en adaptant selon la configuration de votre réseau.
+	nmcli con mod "wired-connection" \
+	  ipv4.addresses 192.168.1.200/24 \
+	  ipv4.gateway 192.168.1.1 \
+	  ipv4.method manual
 
-On peut en profiter pour ouvrir les (présents et futurs) ports utilisés dans la page de configuration de votre box ou de votre routeur.  
-Vous pouvez aussi mettre votre RBPi en DMZ si vous souhaitez que toutes les requêtes provenant de l'extérieur lui soient soumises.
+	nmcli con up "wired-connection"
+
+ S’il y a changement d’adresse IP, la connexion va couper. On doit alors se reconnecter en SSH.
+
+Cela créé le fichier `/etc/NetworkManager/system-connections/wired-connection.nmconnection` que l’on peut modifier aussi directement. Pour recharger la configuration : 
+
+	nmcli con reload
+	nmcli con up "wired-connection"
+
 
 ## Comptes utilisateurs
 
@@ -148,7 +173,7 @@ On commence par modifier (ou attribuer) un mot de passe pour le compte `root` :
 
 On créé son compte utilisateur
 
-	adduser you
+	adduser your_username
 
 On se déloggue (`exit`) et on se reconnecte avec le compte utilisateur nouvellement créé.
 
@@ -166,7 +191,7 @@ Pour effectuer des commandes nécessitant les super-pouvoirs on passera en `root
 
 ## Sécurisation de SSH
 
-Dans la configuration par défaut, SSH est configuré sur le port 22, n'importe quel utilisateur (dont `root` !) peut s'y connecter.
+Dans la configuration par défaut, SSH est configuré sur le port 22, n’importe quel utilisateur (dont `root` !) peut s'y connecter.
 
 Se reporter à la partie SSH du paragraphe « [Première connexion](https://github.com/Devenet/Memo/blob/master/debian.md#première-connexion) » du document sur [Debian](https://github.com/Devenet/Memo/blob/master/debian.md) pour changer ses paramètres.  
 Le paragraphe « [SSH](https://github.com/Devenet/Memo/blob/master/debian.md#ssh) » permet de recevoir un email à chaque connexion d'un utilisateur SSH.
@@ -185,22 +210,11 @@ On peut maintenant redémarrer le RBPi pour que les nouveaux paramètres soient 
 
 # Configuration pour serveur
 
-Maintenant que notre RBPi a une IP fixe avec des comptes locaux à différents niveaux et un service SSH plus sécurisé, on va continuer notre configuration pour désinstaller les paquets initules pour notre serveur.
-
-## Suppression des paquets
-
-On commencer par mettre à jour le dépôt des paquets avec
-
-	apt-get update
-
-On supprimer les paquets inutiles (ça en fait un paquet…) :
-
-	aptitude purge xserver-xorg xserver-xorg-core xserver-xorg-input-all xserver-xorg-input-evdev xserver-xorg-input-synaptics xserver-xorg-video-fbdev xserver-common xpdf xinit x11-common x11-utils x11-xkb-utils xarchiver screen pcmanfm penguinspuzzle lxde-common lxappearance lxde-icon-theme lxinput lxmenu-data lxpanel lxpolkit lxrandr lxsession lxsession-edit lxshortcut lxtask lxterminal leafpad dillo galculator gnome-icon-theme gnome-themes-standard gnome-themes-standard-data gpicview hicolor-icon-theme
-	aptitude purge ~c
+Maintenant que notre RBPi a une IP fixe avec des comptes locaux à différents niveaux et un service SSH plus sécurisé, on va continuer notre configuration.
 
 ## Mises à jour
 
-On peut maintenant lancer les mises à jour (à faire régulièrement) :
+On peut lancer les mises à jour (à faire régulièrement) :
 
 	apt-get update && apt-get upgrade -y
 
@@ -208,13 +222,6 @@ Si vous souhaitez mettre à jour votre distribution pour la version suppérieure
 
 	apt-get dist-upgrade
 
-## Paquet rpi-update
-
-Pour mettre à jour automatiquement le firmware du RBPi, on va installer le paquet `rpi-update` (s'il n'a pas déjà été installé) :
-
-	apt-get install rpi-update
-
-Ainsi, il suffira de lancer la commande `rpi-update` pour mettre à jour le firmware avec la dernière version disponible (nécessite un redémarrage pour la prise en compte).
 
 ## Wake On Lan
 
@@ -227,7 +234,6 @@ Il faut ensuite créer le fichier `etc/ethers` dans lequel vous mettez l'adresse
 Pour réveiller un ordinateur, il suffit de faire :
 
 	etherwake gentil_nom
-
 
 
 # Installation de services
