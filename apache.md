@@ -57,7 +57,7 @@ Dans le fichier `/etc/apache2/conf-available/security.conf`, on vérifie que les
 	ServerSignature Off
 	TraceEnable Off
 
-Pour désactiver le listage des dossiers par défaut et l’accès, on ajoute cette inscrution au début du fichier :
+Pour désactiver le listage des dossiers par défaut, on peut ajouter cette inscrution à la fin du fichier :
 
 	<Directory />
 		Options -Indexes
@@ -173,6 +173,9 @@ Pour que les modifications soient prises en compte, on recharge le service :
 
 	service php8.4-fpm reload
 
+Si besoin, la [liste des fuseaux horaires en PHP](https://www.nicolas.pm/note/liste-des-fuseaux-horaires-en-php).
+
+
 ## Virtual hosts
 
 Pour servir plusieurs sites web avec des noms de domaines différents, on va utiliser les vhosts d’Apache.
@@ -265,8 +268,7 @@ __Notez bien que cela peut faciliter le piratage de votre réseau, à faire en c
 
 On commence par installer et activer les modules nécessaires :
 
-	a2enmod proxy
-	a2enmod proxy_http
+	a2enmod proxy proxy_http
 
 Puis on configure le _vhost_ :
 
