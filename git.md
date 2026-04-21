@@ -1,7 +1,8 @@
 # Astuces Git
 
 * [Ajouter ses clefs de connexion Git SSH](#ajouter-ses-clefs-de-connexion-git-ssh)
-* [Exécuter une commande Git en tant que www-data](#executer-une-commande-git-en-tant-que-www-data)
+* [Créer des clés de déploiement](#créer-des-clefs-de-déploiement)
+* [Exécuter une commande Git en tant que www-data](#exécuter-une-commande-git-en-tant-que-www-data)
 * [Faire un remisage](#faire-un-remisage) et [récupérer son remisage](#récupérer-son-remisage)
 * [Cloner un repository avec seulement les derniers commits](#cloner-un-repository-avec-seulement-les-derniers-commits)
 * [Créer une branche vide](#créer-une-branche-vide)
@@ -38,7 +39,9 @@ Petit bonus : actuellement la clef ajoutée sera testée pour toute connexion, q
 
 _Astuces tirées de [Add private key permanently with ssh-add on Ubuntu](https://stackoverflow.com/questions/3466626/add-private-key-permanently-with-ssh-add-on-ubuntu/4246809#4246809)._
 
-Pour ajouter une clef de déploiement à un utilisateur virtuel, voir [deployment_key.sh](https://gist.github.com/nicolabricot/2d488601712b2723544e)
+## Créer des clés de déploiement
+
+Pour ajouter une clef de déploiement à un utilisateur, y compris virtuel, voir [deployment_keys.sh](https://gist.github.com/Devenet/12fafcfcbdca94a1a42ec8117091e665)
 
 ## Exécuter une commande Git en tant que www-data
 
