@@ -15,6 +15,10 @@ Ce guide a été effectué et mis à jour pour une installation de Rapbian sur u
 * [Configuration pour serveur](#configuration-pour-serveur)
 	* [Mises à jour](#mises-à-jour)
 	* [Wake On Lan](#wake-on-lan)
+* [Purge supplémentaire](#purge-supplémentaire)
+    * [Services cloud](#services-cloud)
+    * [Connectivité](#connectivité)
+  	* [Modules](#modules)
 * [Installation de services](#installation-de-services)
 	* [Plugins Munin](#plugins-munin)
 
@@ -222,6 +226,15 @@ Si vous souhaitez mettre à jour votre distribution pour la version suppérieure
 
 	apt-get dist-upgrade
 
+### unattended-upgrades
+
+En suivant les [instructions pour Debian](https://github.com/Devenet/Memo/blob/master/debian.md#unattended-upgrades), il faut adapter le fichier `/etc/apt/apt.conf.d/50unattended-upgrades` pour Raspbian : 
+
+Unattended-Upgrade::Origins-Pattern {
+        // Raspberry Pi OS
+        "origin=Raspbian,codename=${distro_codename},label=Raspbian";
+        "origin=Raspberry Pi Foundation,codename=${distro_codename},label=Raspberry Pi Foundation";
+
 
 ## Wake On Lan
 
@@ -234,6 +247,54 @@ Il faut ensuite créer le fichier `etc/ethers` dans lequel vous mettez l'adresse
 Pour réveiller un ordinateur, il suffit de faire :
 
 	etherwake gentil_nom
+
+# Purge supplémentaire
+
+En se basant sur l’article [Rendre Raspberry Pi OS utilisable sur un Pi 0](https://richard-dern.fr/interets/informatique/2026/04/26/rendre-raspberry-pi-os-utilisable-sur-un-pi-0-w/), on peut supprimer certains éléments non nécessaires.
+
+## Services cloud
+
+Comme on a configuré manuellement notre Raspberry Pi, on n’a pas besoin de ces services d’initialisation ou de configuration automatique.
+
+	systemctl disable cloud-init-local cloud-config cloud-final
+	apt purge cloud-init -y
+	rm -rf /etc/cloud /var/lib/cloud /var/log/cloud-init*
+
+Cela devrait permettre de réduire le temps de démarrage.
+
+On peut aussi retirer l’accès distant officiel :
+
+	apt purge -y rpi-connect-lite
+
+On nettoie et on redémarre :
+
+	apt autoremove --purge -y
+	reboot
+
+## Connectivité
+
+Notre Raspberry Pi étant connecté en Ethernet, sans Bluetooth, sans Wi-Fi, sans haut-parleur, sans image, sans modem USB, on peut supprimer les paquets suivants :
+
+	apt purge -y avahi-daemon bluez bluez-firmware firmware-atheros firmware-libertas firmware-mediatek firmware-realtek alsa-utils alsa-topology-conf alsa-ucm-conf rpicam-apps-lite rpicam-apps-core v4l-utils usb-modeswitch usb-modeswitch-data mkvtoolnix ncurses-term
+
+On nettoie et on redémarre :
+
+	apt autoremove --purge -y
+	reboot
+
+## Modules
+
+On a déjà réduit la mémoire graphique plus haut. On peut maintenant aussi désactiver l’audio, le scan d’un matériel caméra et le Bluetooth. On modifie le fichier `/boot/firmware/config.txt`: 
+
+	dtparam=audio=off
+	camera_auto_detect=0
+
+Et ajoute à la fin : 
+
+	# Disable bluetooth
+	dtoverlay=disable-bt
+
+Pour que les modifications soient prises en compte, on redémarre le Raspberry Pi.
 
 
 # Installation de services
